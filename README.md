@@ -276,7 +276,7 @@ Let's take the 2nd one, the one that is in proper pair, and find it's pair.
 
 try
 ```
-samtools view alignment/NA12878/NA12878.sorted.bam | grep ERR001733.2317763
+samtools view alignment/NA12878/NA12878.sorted.bam | grep ERR001742.6173685
 
 ```
 

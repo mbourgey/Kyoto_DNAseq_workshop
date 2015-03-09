@@ -43,8 +43,31 @@ bwa mem -M -t 2   -R '@RG\tID:ERR_ERR_1\tSM:NA12878\tLB:ERR\tPU:runERR_1\tCN:Bro
 
 bwa mem -M -t 2   -R '@RG\tID:SRR_SRR_1\tSM:NA12878\tLB:SRR\tPU:runSRR_1\tCN:Broad Institute\tPL:ILLUMINA'   ${REF}/b37.fasta   reads/NA12878/runSRR_1/NA12878.SRR.t20l32.pair1.fastq.gz   reads/NA12878/runSRR_1/NA12878.SRR.t20l32.pair2.fastq.gz   | java -Xmx2G -jar ${PICARD_HOME}/SortSam.jar   INPUT=/dev/stdin   OUTPUT=alignment/NA12878/runSRR_1/NA12878.SRR.sorted.bam   CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000
 
+java -Xmx2G -jar ${PICARD_HOME}/MergeSamFiles.jar   INPUT=alignment/NA12878/runERR_1/NA12878.ERR.sorted.bam   INPUT=alignment/NA12878/runSRR_1/NA12878.SRR.sorted.bam   OUTPUT=alignment/NA12878/NA12878.sorted.bam   VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true
+
+ls -l alignment/NA12878/
+
+samtools view -H alignment/NA12878/NA12878.sorted.bam | grep "^@RG"
+
+samtools view alignment/NA12878/NA12878.sorted.bam | head -n2
+
+samtools view alignment/NA12878/NA12878.sorted.bam | grep ERR001742.6173685
+
+samtools view -c -f4 alignment/NA12878/NA12878.sorted.bam
+
+samtools view -c -F4 alignment/NA12878/NA12878.sorted.bam
+
+java -Xmx2G  -jar ${GATK_JAR}   -T RealignerTargetCreator   -R ${REF}/b37.fasta   -o alnment/NA12878/realign.intervals   -I alignment/NA12878/NA12878.sorted.bam   -L 1
+
+java -Xmx2G -jar ${GATK_JAR}   -T IndelRealigner   -R ${REF}/b37.fasta   -targetIntervals alignment/NA12878/realign.intervals   -o alignment/NA12878/NA12878.realigned.sorted.bam   -I alignment/NA12878/NA12878.sorted.bam
+
+java -Xmx2G -jar ${PICARD_HOME}/FixMateInformation.jar   VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000   INPUT=alignment/NA12878/NA12878.realigned.sorted.bam   OUTPUT=alignment/NA12878/NA12878.matefixed.sorted.bam
 
 
+java -Xmx2G -jar ${PICARD_HOME}/MarkDuplicates.jar   REMOVE_DUPLICATES=false CREATE_MD5_FILE=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true   INPUT=alignment/NA12878/NA12878.matefixed.sorted.bam   OUTPUT=alignment/NA12878/NA12878.sorted.dup.bam   METRICS_FILE=alignment/NA12878/NA12878.sorted.dup.metrics
 
+java -Xmx2G -jar ${GATK_JAR}   -T BaseRecalibrator   -nct 2   -R ${REF}/b37.fasta   -knownSites ${REF}/dbSnp-137.vcf.gz   -L 1:47000000-47171000   -o alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp   -I alignment/NA12878/NA12878.sorted.dup.bam
 
+java -Xmx2G -jar ${GATK_JAR}   -T PrintReads   -nct 2   -R ${REF}/b37.fasta   -BQSR alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp   -o alignment/NA12878/NA12878.sorted.dup.recal.bam   -I alignment/NA12878/NA12878.sorted.dup.bam
 
+java -Xmx2G -jar ${GATK_JAR}   -T BaseRecalibrator   -nct 2   -R ${REF}/b37.fasta   -knownSites ${REF}/dbSnp-137.vcf.gz   -L 1:47000000-47171000   -o alignment/NA12878/NA12878.sorted.dup.recalibration_report.seconnd.grp   -I alignment/NA12878/NA12878.sorted.dup.bam   -BQSR alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp
