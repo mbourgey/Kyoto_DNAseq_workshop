@@ -4,7 +4,7 @@ m mugqic/tabix/0.2.6 mugqic/igvtools/2.3.14 mugqic/snpEff/4.0 mugqic/GenomeAnaly
 
 export REF=$(pwd)/references/
 
-zless -S raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
+#zless -S raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
 
 zcat raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz | head -n4
 zcat raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair2.fastq.gz | head -n4
@@ -76,9 +76,31 @@ java -Xmx2G -jar ${GATK_JAR}   -T AnalyzeCovariates   -R ${REF}/b37.fasta   -bef
 
 java  -Xmx2G -jar ${GATK_JAR}   -T DepthOfCoverage   --omitDepthOutputAtEachBase   --summaryCoverageThreshold 10   --summaryCoverageThreshold 25   --summaryCoverageThreshold 50   --summaryCoverageThreshold 100   --start 1 --stop 500 --nBins 499 -dt NONE   -R ${REF}/b37.fasta   -o alignment/NA12878/NA12878.sorted.dup.recal.coverage   -I alignment/NA12878/NA12878.sorted.dup.recal.bam   -L 1:47000000-47171000
 
-less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
+#less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
 
 java -Xmx2G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar   VALIDATION_STRINGENCY=SILENT   REFERENCE_SEQUENCE=${REF}/b37.fasta   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv   HISTOGRAM_FILE=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.histo.pdf   METRIC_ACCUMULATION_LEVEL=LIBRARY
 
-less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
+#less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
+
+java -Xmx2G -jar ${PICARD_HOME}/CollectAlignmentSummaryMetrics.jar   VALIDATION_STRINGENCY=SILENT   REFERENCE_SEQUENCE=${REF}/b37.fasta   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv   METRIC_ACCUMULATION_LEVEL=LIBRARY
+
+#less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv
+
+mkdir variants
+
+samtools mpileup -L 1000 -B -q 1 -D -S -g   -f ${REF}/b37.fasta   -r 1:47000000-47171000   alignment/NA12878/NA12878.sorted.dup.recal.bam   | bcftools view -vcg -   > variants/mpileup.vcf
+
+java -Xmx2G -jar ${GATK_JAR}   -T UnifiedGenotyper   -R ${REF}/b37.fasta   -I alignment/NA12878/NA12878.sorted.dup.recal.bam   -o variants/ug.vcf   --genotype_likelihoods_model BOTH   -dt none   -L 1:46000000-47600000
+
+for i in variants/*.vcf;do bgzip -c $i > $i.gz ; tabix -p vcf $i.gz;done
+
+#zless -S variants/mpileup.vcf.gz
+
+java  -Xmx6G -jar ${SNPEFF_HOME}/snpEff.jar   eff -v -c ${SNPEFF_HOME}/snpEff.config   -o vcf   -i vcf   -stats variants/mpileup.snpeff.vcf.stats.html   GRCh37.74   variants/mpileup.vcf   > variants/mpileup.snpeff.vcf
+
+igvtools count   -f min,max,mean   alignment/NA12878/NA12878.sorted.dup.recal.bam   alignment/NA12878/NA12878.sorted.dup.recal.bam.tdf   b37
+
+mkdir -p SV/breakdancer
+
+perl ${BREAKDNACER_HOME}/perl/bam2cfg.pl -c 3 alignment/NA12878/NA12878.sorted.dup.recal.bam >  SV/breakdancer/NA12878.cfg
 
