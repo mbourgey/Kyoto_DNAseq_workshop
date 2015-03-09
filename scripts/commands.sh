@@ -71,3 +71,14 @@ java -Xmx2G -jar ${GATK_JAR}   -T BaseRecalibrator   -nct 2   -R ${REF}/b37.fast
 java -Xmx2G -jar ${GATK_JAR}   -T PrintReads   -nct 2   -R ${REF}/b37.fasta   -BQSR alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp   -o alignment/NA12878/NA12878.sorted.dup.recal.bam   -I alignment/NA12878/NA12878.sorted.dup.bam
 
 java -Xmx2G -jar ${GATK_JAR}   -T BaseRecalibrator   -nct 2   -R ${REF}/b37.fasta   -knownSites ${REF}/dbSnp-137.vcf.gz   -L 1:47000000-47171000   -o alignment/NA12878/NA12878.sorted.dup.recalibration_report.seconnd.grp   -I alignment/NA12878/NA12878.sorted.dup.bam   -BQSR alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp
+
+java -Xmx2G -jar ${GATK_JAR}   -T AnalyzeCovariates   -R ${REF}/b37.fasta   -before alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp   -after alignment/NA12878/NA12878.sorted.dup.recalibration_report.seconnd.grp   -csv BQSR.csv   -plots BQSR.pdf
+
+java  -Xmx2G -jar ${GATK_JAR}   -T DepthOfCoverage   --omitDepthOutputAtEachBase   --summaryCoverageThreshold 10   --summaryCoverageThreshold 25   --summaryCoverageThreshold 50   --summaryCoverageThreshold 100   --start 1 --stop 500 --nBins 499 -dt NONE   -R ${REF}/b37.fasta   -o alignment/NA12878/NA12878.sorted.dup.recal.coverage   -I alignment/NA12878/NA12878.sorted.dup.recal.bam   -L 1:47000000-47171000
+
+less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
+
+java -Xmx2G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar   VALIDATION_STRINGENCY=SILENT   REFERENCE_SEQUENCE=${REF}/b37.fasta   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv   HISTOGRAM_FILE=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.histo.pdf   METRIC_ACCUMULATION_LEVEL=LIBRARY
+
+less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
+
