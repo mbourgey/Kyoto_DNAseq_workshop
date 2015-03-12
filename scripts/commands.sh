@@ -100,7 +100,4 @@ java  -Xmx6G -jar ${SNPEFF_HOME}/snpEff.jar   eff -v -c ${SNPEFF_HOME}/snpEff.co
 
 igvtools count   -f min,max,mean   alignment/NA12878/NA12878.sorted.dup.recal.bam   alignment/NA12878/NA12878.sorted.dup.recal.bam.tdf   b37
 
-mkdir -p SV/breakdancer
-
-perl ${BREAKDNACER_HOME}/perl/bam2cfg.pl -c 3 alignment/NA12878/NA12878.sorted.dup.recal.bam >  SV/breakdancer/NA12878.cfg
 
