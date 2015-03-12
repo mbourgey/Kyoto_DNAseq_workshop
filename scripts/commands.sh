@@ -90,7 +90,7 @@ mkdir variants
 
 samtools mpileup -L 1000 -B -q 1 -D -S -g   -f ${REF}/b37.fasta   -r 1:47000000-47171000   alignment/NA12878/NA12878.sorted.dup.recal.bam   | bcftools view -vcg -   > variants/mpileup.vcf
 
-java -Xmx2G -jar ${GATK_JAR}   -T UnifiedGenotyper   -R ${REF}/b37.fasta   -I alignment/NA12878/NA12878.sorted.dup.recal.bam   -o variants/ug.vcf   --genotype_likelihoods_model BOTH   -dt none   -L 1:46000000-47600000
+#java -Xmx2G -jar ${GATK_JAR}   -T UnifiedGenotyper   -R ${REF}/b37.fasta   -I alignment/NA12878/NA12878.sorted.dup.recal.bam   -o variants/ug.vcf   --genotype_likelihoods_model BOTH   -dt none   -L 1:46000000-47600000
 
 for i in variants/*.vcf;do bgzip -c $i > $i.gz ; tabix -p vcf $i.gz;done
 
