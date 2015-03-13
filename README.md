@@ -27,8 +27,8 @@ The initial structure of your folders should look like this:
 ### Environment setup
 ```
 export PATH=$PATH:TO_BE_DET_PATH/tabix-0.2.6/:TO_BE_DET_PATH/igvtools_2.3.31/
-export PICARD_HOME=/usr/local/bin 
-export SNPEFF_HOME=/usr/local/bin  
+export PICARD_HOME=/usr/local/bin/ 
+export SNPEFF_HOME=/usr/local/bin/  
 export GATK_JAR=/usr/local/bin/GenomeAnalysisTK.jar
 export BVATOOLS_JAR=/usr/local/bin/bvatools-1.4-full.jar 
 export TRIMMOMATIC_JAR=/usr/local/bin/trimmomatic-0.32.jar 
@@ -54,35 +54,49 @@ These are all already installed, but here are the original links.
 
 # First data glance
 So you've just received an email saying that your data is ready for download from the sequencing center of your choice.
-The first thing to do is download it, the second thing is making sure it is of good quality.
+
+**What should you do ?** [solution](solutions/_data.md)
+
 
 ### Fastq files
 Let's first explore the fastq file.
 
 Try these commands
+
 ```
 zless -S raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
 
+```
+
+**Why was it like that ?** [solution](solutions/_fastq1.md)
+
+
+Now try these commands:
+
+```
 zcat raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz | head -n4
 zcat raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair2.fastq.gz | head -n4
 ```
-From the second set of commands (the head), what was special about the output?
-Why was it like that?
-[Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_fastq.ex1.md)
+
+** what was special about the output ?**
+Why was it like that? [Solution](solutions/_fastq2.md)
 
 You could also just count the reads
 ```
 zgrep -c "^@SRR" raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
 ```
-Why shouldn't you just do
+
+We should obtain 15546 reads
+
+**Why shouldn't you just do ?** 
 ```
 zgrep -c "^@" raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
 ```
-[Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/_fastq.ex2.md)
+[Solution](solutions/_fastq3.md)
 
 
 ### Quality
-We can't look at all the reads. Especially when working with whole genome 30x data. You could easilly have Billions of reads.
+We can't look at all the reads. Especially when working with whole genome 30x data. You could easily have Billions of reads.
 
 Tools like FastQC and BVATools readsqc can be used to plot many metrics from these data sets.
 
@@ -107,42 +121,57 @@ Copy the images from the ```originalQC``` folder to your desktop and open the im
 scp -r <USER>@www.genome.med.kyoto-u.ac.jp:~/workshop/originalQC/ ./
 ```
 
-What stands out in the graphs?
-[Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_fastqQC.ex1.md)
+Open the images
 
-All the generated graphics have their uses. This being said 2 of them are particularly useful to get an overal picture of how good or bad a run went. These are the Quality box plots and the nucleotide content graphs.
+**What stands out in the graphs ?**
+[Solution](solutions/_fastqQC1.md)
 
-The Box plot shows the quality distribution of your data. In this case the reasons there are spikes and jumps in quality and length is because there are actually different libraries pooled together in the 2 fastq files. The sequencing lengths vary between 36,50,76 bp read lengths. The Graph goes > 100 because both ends are appended one after the other.
+All the generated graphics have their uses. But 2 of them are particularly useful to get an overal picture of how good or bad a run went.
+	The Quality box plots 
+	The nucleotide content graphs.
+	The Box plot shows the quality distribution of your data. 
+The quality of a base is computated using the Phread quality score.
+[notes](notes/_fastQC1.md) 
+
 
 The quality of a base is computated using the Phread quality score.
-![Phred quality score formula](img/phredFormula.png)
+![Phred quality score formula](img/phred_formula.png)
 
-The formula outputs an integer that is encoded using an [ASCII](http://en.wikipedia.org/wiki/ASCII) table. The way the lookup is done is by taking the the phred score adding 33 and using this number as a lookup in the table. The Wikipedia entry for the [FASTQ format](http://en.wikipedia.org/wiki/FASTQ_format) has a summary of the varying values.
+In the case of base quality the probability use represents the probability of base to have been wrongly called
+![Base Quality values](img/base_qual_value.png)
+
+The formula outputs an integer that is encoded using an ASCII table. 
+
+The way the lookup is done is by taking the the phred score adding 33 and using this number as a lookup in the table.
 
 Older illumina runs were using phred+64 instead of phred+33 to encode their fastq files.
 
-In the SRR dataset we also see some adapters.
-Why does this happen [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_fastqQC.ex2.md)
+![ACII table](img/ascii_table.png)
 
 
-### Trimming
-After this careful analysis of the raw data we see that
-- Some reads have bad 3' ends.
-- Some reads have adapter sequences in them.
+Of the raw data we see that:
+	Some reads have bad 3' ends.
+	Some reads have adapter sequences in them.
+**Why do we see adapters in SRR ?** [solution](solutions/_adapter1.md)
 
 Although nowadays this doesn't happen often, it does still happen. In some cases, miRNA, it is expected to have adapters.
 
-Since they are not part of the genome of interest they should be removed if enough reads have them.
 
-To be able to remove the adapters we need to feed them to a tool. In this case we will use Trimmomatic. The adapter file is already in your work folder.
-We can look at the adapters
+
+### Trimming
+Since adapter are not part of the genome they should be removed
+
+To do that we will use Trimmomatic.
+ 
+The adapter file is in your work folder. 
+
 ```
 cat adapters.fa
 ```
-Why are there 2 different ones? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_trim.ex1.md)
+**Why are there 2 different ones ?** [Solution](/solutions/_trim1.md)
 
 
-Let's try removing them and see what happens.
+trimming with trimmomatic:
 ```
 mkdir -p reads/NA12878/runSRR_1/
 mkdir -p reads/NA12878/runERR_1/
@@ -169,8 +198,9 @@ java -Xmx2G -cp $TRIMMOMATIC_JAR org.usadellab.trimmomatic.TrimmomaticPE -thread
 
 cat reads/NA12878/runERR_1/NA12878.ERR.trim.out reads/NA12878/runSRR_1/NA12878.SRR.trim.out
 ```
+[note on trimmomatic command](notes/_trimmomatic.md)
 
-What does Trimmomatic says it did? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_trim.ex2.md)
+**What does Trimmomatic says it did ?** [Solution](solutions/_trim2.md)
 
 Let's look at the graphs now
 
@@ -186,14 +216,17 @@ java -Xmx1G -jar ${BVATOOLS_JAR} readsqc \
   --threads 2 --regionName SRR --output postTrimQC/
 ```
 
-How does it look now? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_trim.ex3.md)
+**How does it look now ?** [Solution](solutions/_trim3.md)
 
 
 # Alignment
 The raw reads are now cleaned up of artefacts we can align each lane separatly.
 
-Why should this be done separatly? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_aln.ex1.md)
+**Why should this be done separatly?** [Solution](solutions/_aln1.md)
 
+**Why is it important to set Read Group information ?** [Solution](solutions_aln2.md)
+
+ALignment with bwa-mem:
 ```
 mkdir -p alignment/NA12878/runERR_1
 mkdir -p alignment/NA12878/runSRR_1
@@ -218,19 +251,17 @@ bwa mem -M -t 2 \
   OUTPUT=alignment/NA12878/runSRR_1/NA12878.SRR.sorted.bam \
   CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000
 ```
+ 
+**Why did we pipe the output of one to the other ?** [Solution](solutions/_aln3.md)
 
-Why is it important to set Read Group information? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_aln.ex2.md)
-
-The details of the fields can be found in the SAM/BAM specifications [Here](http://samtools.sourceforge.net/SAM1.pdf)
-For most cases, only the sample name, platform unit and library one are important. 
-
-Why did we pipe the output of one to the other? Could we have done it differently? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_aln.ex3.md)
+**Could we have done it differently ?** [Solution](solutions/_aln4.md)
 
 We will explore the generated BAM latter.
 
 # Lane merging
-We now have alignments for each of the sequences lanes. This is not practical in it's current form. What we wan't to do now
-is merge the results into one BAM.
+We now have alignments for each of the sequences lanes. 
+	This is not practical in it's current form. 
+	What we wan't to do now is merge the results into one BAM.
 
 Since we identified the reads in the BAM with read groups, even after the merging, we can still identify the origin of each read.
 
@@ -251,7 +282,10 @@ samtools view -H alignment/NA12878/NA12878.sorted.bam | grep "^@RG"
 ```
 
 You should have your 2 read group entries.
-Why did we use the ```-H``` switch? Try without. What happens? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_merge.ex1.md)
+
+**Why did we use the ```-H``` switch? ** [Solution](solutions/_merge1.md)
+
+**Try without. What happens?** [Solution](solutions/_merge2.md)
 
 ## SAM/BAM
 Let's spend some time to explore bam files.
