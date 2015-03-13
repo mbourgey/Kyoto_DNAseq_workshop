@@ -27,22 +27,22 @@ The initial structure of your folders should look like this:
 ### Environment setup
 ```
 export PATH=$PATH:TO_BE_DET_PATH/tabix-0.2.6/:TO_BE_DET_PATH/igvtools_2.3.31/
-export PICARD_HOME=/usr/local/bin
-export SNPEFF_HOME=TO_BE_DET_PATH/snpEff_v3_5_core/snpEff
+export PICARD_HOME=/usr/local/bin 
+export SNPEFF_HOME=/usr/local/bin  
 export GATK_JAR=/usr/local/bin/GenomeAnalysisTK.jar
-export BVATOOLS_JAR=TO_BE_DET_PATH/bvatools-1.1/bvatools-1.1-full.jar
-export TRIMMOMATIC_JAR=/usr/local/bin/trimmomatic-0.32.jar
-export REF=TO_BE_DET_PATH/kyotoWorkshop/references/
+export BVATOOLS_JAR=/usr/local/bin/bvatools-1.4-full.jar 
+export TRIMMOMATIC_JAR=/usr/local/bin/trimmomatic-0.32.jar 
+export REF=/home/mBourgey/kyoto_workshop_WGS_2015/references/ 
 
-cd $HOME
-rsync -avP TO_BE_DET_PATH/cleanCopy/ $HOME/workshop/
-cd $HOME/workshop/
+cd $HOME 
+rsync -avP /home/mBourgey/cleanCopy $HOME/workshop 
+cd $HOME/workshop/ 
 ```
 
 ### Software requirements
 These are all already installed, but here are the original links.
 
-  * [FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+  * [Trimmomatic](http://www.usadellab.org/cms/?page=trimmomatic)
   * [BVATools](https://bitbucket.org/mugqic/bvatools/downloads)
   * [SAMTools](http://sourceforge.net/projects/samtools/)
   * [IGV](http://www.broadinstitute.org/software/igv/download)
