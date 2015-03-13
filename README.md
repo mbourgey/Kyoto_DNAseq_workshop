@@ -287,58 +287,8 @@ You should have your 2 read group entries.
 
 **Try without. What happens?** [Solution](solutions/_merge2.md)
 
-## SAM/BAM
-Let's spend some time to explore bam files.
+[lane merging note](notes/_merge1.md)
 
-try
-```
-samtools view alignment/NA12878/NA12878.sorted.bam | head -n2
-```
-
-Here you have examples of alignment results.
-A full description of the flags can be found in the SAM specification
-http://samtools.sourceforge.net/SAM1.pdf
-
-Try using picards explain flag site to understand what is going on with your reads
-http://picard.sourceforge.net/explain-flags.html
-
-The flag is the 2nd column.
-
-What do the flags of the first 2 reads mean? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_sambam.ex1.md)
-
-Let's take the 2nd one, the one that is in proper pair, and find it's pair.
-
-try
-```
-samtools view alignment/NA12878/NA12878.sorted.bam | grep ERR001742.6173685
-
-```
-
-Why did searching one name find both reads? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_sambam.ex2.md)
-
-You can use samtools to filter reads as well.
-
-```
-# Say you want to count the *un-aligned* reads you can use
-samtools view -c -f4 alignment/NA12878/NA12878.sorted.bam
-
-# Or you want to count the *aligned* reads you can use
-samtools view -c -F4 alignment/NA12878/NA12878.sorted.bam
-
-```
-How many reads mapped and unmapped were there? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_sambam.ex3.md)
-
-
-Another useful bit of information in the SAM is the CIGAR string.
-It's the 6th column in the file. This column explains how the alignment was achieved.
-M == base aligns *but doesn't have to be a match*. A SNP will have an M even if it disagrees with the reference.
-I == Insertion
-D == Deletion
-S == soft-clips. These are handy to find un removed adapters, viral insertions, etc.
-
-An in depth explanation of the CIGAR can be found [here](http://genome.sph.umich.edu/wiki/SAM)
-The exact details of the cigar string can be found in the SAM spec as well.
-Another good site
 
 # Cleaning up alignments
 We started by cleaning up the raw reads. Now we need to fix some alignments.
@@ -350,6 +300,7 @@ It basically runs in 2 steps
 1- Find the targets
 2- Realign them.
 
+GATK IndelRealigner:
 ```
 java -Xmx2G  -jar ${GATK_JAR} \
   -T RealignerTargetCreator \
@@ -367,33 +318,16 @@ java -Xmx2G -jar ${GATK_JAR} \
 
 ```
 
-How could we make this go faster? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_realign.ex1.md)
-How many regions did it think needed cleaning? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_realign.ex2.md)
+**How could we make this go faster ?** [Solution](solutions/_realign1.md)
 
-Indel Realigner also makes sure the called deletions are left aligned when there is a microsat of homopolmer.
-```
-This
-ATCGAAAA-TCG
-into
-ATCG-AAAATCG
+**How many regions did it think needed cleaning ?** [Solution](solutions/_realign2.md)
 
-or
-ATCGATATATATA--TCG
-into
-ATCG--ATATATATATCG
-```
-
-This makes it easier for down stream tools.
 
 # FixMates
-This step shouldn't be necessary...but it is.
+Why ? 
+	Some read entries don't have their mate information written properly.
 
-This goes through the BAM file and find entries which don't have their mate information written properly.
-
-This used to be a problem in the GATKs realigner, but they fixed it. It shouldn't be a problem with aligners like BWA, but there are always corner cases that create
-one-off corrdinates and such.
-
-This happened a lot with bwa backtrack. This happens less with bwa mem, but it still happens none the less.
+We use Picard to do this:
 
 ```
 java -Xmx2G -jar ${PICARD_HOME}/FixMateInformation.jar \
@@ -403,9 +337,11 @@ java -Xmx2G -jar ${PICARD_HOME}/FixMateInformation.jar \
 ```
 
 # Mark duplicates
-As the step says, this is to mark duplicate reads.
-What are duplicate reads? What are they caused by? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_markdup.ex1.md)
-What are the ways to detect them? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_markdup.ex2.md)
+**What are duplicate reads ?** [Solution](solutions/_markdup1.md)
+
+**What are they caused by ?** [Solution](solutions/_markdup2.md)
+
+**What are the ways to detect them ?** [Solution](solutions/_markdup3.md)
 
 Here we will use picards approach:
 ```
@@ -417,22 +353,23 @@ java -Xmx2G -jar ${PICARD_HOME}/MarkDuplicates.jar \
 ```
 
 We can look in the metrics output to see what happened.
-We can see that it computed seperate measures for each library.
-Why is this important to do and not combine everything? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_markdup.ex3.md)
+```
+less alignment/NA12878/NA12878.sorted.dup.metrics
+```
 
-How many duplicates were there? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_markdup.ex4.md)
+**How many duplicates were there ?** [Solution](solutions/_markdup4.md)
 
-This is on the high side, usually or rather, now since this is old data, this should be <2% for 2-3 lanes.
 
-# Recalibration
-This is the last BAM cleaning up step.
+We can see that it computed separate measures for each library.
+ 
+**Why is this important to do not combine everything ?** [Solution](solutions/_markdup5.md)
 
-The goal for this step is to try to recalibrate base quality scores. The vendors tend to inflate the values of the bases in the reads.
-Also, this step tries to lower the scores of some biased motifs for some technologies.
+[Note on Duplicate rate](notes/_marduop1.md)
 
-It runs in 2 steps, 
-1- Build covariates based on context and known snp sites
-2- Correct the reads based on these metrics
+# Base Quality recalibration
+**Why do we need to recalibrate base quality scores ?** [Solution](solutions/_recal1.md)
+
+GATK BaseRecalibrator:
 
 ```
 java -Xmx2G -jar ${GATK_JAR} \
@@ -453,39 +390,21 @@ java -Xmx2G -jar ${GATK_JAR} \
   -I alignment/NA12878/NA12878.sorted.dup.bam
 ```
 
-Just to see how things change let's make GATK recalibrate after a first pass
-```
-java -Xmx2G -jar ${GATK_JAR} \
-  -T BaseRecalibrator \
-  -nct 2 \
-  -R ${REF}/b37.fasta \
-  -knownSites ${REF}/dbSnp-137.vcf.gz \
-  -L 1:47000000-47171000 \
-  -o alignment/NA12878/NA12878.sorted.dup.recalibration_report.seconnd.grp \
-  -I alignment/NA12878/NA12878.sorted.dup.bam \
-  -BQSR alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp
 
-java -Xmx2G -jar ${GATK_JAR} \
-  -T AnalyzeCovariates \
-  -R ${REF}/b37.fasta \
-  -before alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp \
-  -after alignment/NA12878/NA12878.sorted.dup.recalibration_report.seconnd.grp \
-  -csv BQSR.csv \
-  -plots BQSR.pdf
-```
-
-The graphs don't mean much because we downsampled the data quite a bit. With a true whole genome or whole exome dataset we can see a bigger effect.
-
-# Extract Metrics
+# Extract BAM metrics
 Once your whole bam is generated, it's always a good thing to check the data again to see if everything makes sens.
 
-## Compute coverage
+**Compute coverage**
 If you have data from a capture kit, you should see how well your targets worked
 
-Both GATK and BVATools have depth of coverage tools. We wrote our own in BVAtools because
-- GATK was deprecating theirs, but they changed their mind
-- GATK's is very slow
-- We were missing come output that we wanted from the GATK's one (GC per interval, valid pairs, etc)
+**Insert Size**
+It tells you if your library worked
+**Alignment metrics**
+It tells you if your sample and you reference fit together
+
+
+## Compute coverage
+Both GATK and BVATools have depth of coverage tools. 
 
 Here we'll use the GATK one
 ```
@@ -501,17 +420,21 @@ java  -Xmx2G -jar ${GATK_JAR} \
   -o alignment/NA12878/NA12878.sorted.dup.recal.coverage \
   -I alignment/NA12878/NA12878.sorted.dup.recal.bam \
   -L 1:47000000-47171000
+```
+[note on DepthOfCoverage command](notes/_DOC.md)
 
-# Look at the coverage
+Coverage is the expected ~30x
+Look at the coverage:
+```
 less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
 ```
 
-Coverage is the expected ~30x. 
-summaryCoverageThreshold is a usefull function to see if your coverage is uniform.
-Another way is to compare the mean to the median. If both are almost equal, your coverage is pretty flat. If both are quite different
-That means something is wrong in your coverage. A mix of WGS and WES would show very different mean and median values.
+**Is the coverage fit with the expectation ?** [solution](solutions/_DOC1.md)
 
 ## Insert Size
+It corresponds to the size of DNA fragments sequenced.
+Different from the gap size: distance between reads
+These metrics are computed using Picard:
 ```
 java -Xmx2G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar \
   VALIDATION_STRINGENCY=SILENT \
@@ -520,19 +443,20 @@ java -Xmx2G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv \
   HISTOGRAM_FILE=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.histo.pdf \
   METRIC_ACCUMULATION_LEVEL=LIBRARY
+```
 
-#look at the output
+look at the output
+```
 less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
 ```
 
 There is something interesting going on with our library ERR.
-From the pdf or the tab seperated file, can you tell what it is? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_insert.ex1.md)
+**Can you tell what it is?** [Solution](solutions/_insert1.md)
 
 ## Alignment metrics
-For the alignment metrics, we used to use ```samtools flagstat``` but with bwa mem since some reads get broken into pieces, the numbers are a bit confusing.
-You can try it if you want.
+For the alignment metrics, ```samtools flagstat``` is very fast but with bwa-mem since some reads get broken into pieces, the numbers are a bit confusing. 
 
-We prefer the Picard way of computing metrics
+We prefer the Picard way of computing metrics:
 
 ```
 java -Xmx2G -jar ${PICARD_HOME}/CollectAlignmentSummaryMetrics.jar \
@@ -541,55 +465,37 @@ java -Xmx2G -jar ${PICARD_HOME}/CollectAlignmentSummaryMetrics.jar \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv \
   METRIC_ACCUMULATION_LEVEL=LIBRARY
+```
 
-# explore the results
+explore the results
+```
 less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv
 
 ```
 
+**Do you think the sample and the reference genome fit together ?** [Solution](solutions/_alnMetrics1.md)
+
 
 # Variant calling
-Here we will try 3 variant callers.
-I won't go into the details of finding which variant is good or bad since this will be your next workshop.
-Here we will just call and view the variants.
 
-Start with:
+![SNV call summary workflow](img/snv_call.png)
+
+Most of SNV caller use either a Baysian, a threshold or a t-test approach to do the calling
+
+I won't go into the details of finding which variant is good or bad since this will be your next workshop. 
+
+Here we will just call and view the variants using the ```samtools mpileup``` function:
+
 ```
 mkdir variants
-```
+samtools mpileup -L 1000 -B -q 1 -g \
+	-f ${REF}/b37.fasta \
+	-r 1:47000000-47171000 
+	alignment/NA12878/NA12878.sorted.dup.recal.bam | bcftools call -c -  \
+	> variants/mpileup.vcf
 
-## Samtools
 ```
-samtools mpileup -L 1000 -B -q 1 -D -S -g \
-  -f ${REF}/b37.fasta \
-  -r 1:47000000-47171000 \
-  alignment/NA12878/NA12878.sorted.dup.recal.bam \
-  | bcftools view -vcg - \
-  > variants/mpileup.vcf
-```
-
-## GATK Unified Genotyper
-```
-java -Xmx2G -jar ${GATK_JAR} \
-  -T UnifiedGenotyper \
-  -R ${REF}/b37.fasta \
-  -I alignment/NA12878/NA12878.sorted.dup.recal.bam \
-  -o variants/ug.vcf \
-  --genotype_likelihoods_model BOTH \
-  -dt none \
-  -L 1:46000000-47600000
-```
-
-## GATK Haplotyper
-```
-java -Xmx2G -jar ${GATK_JAR} \
-  -T HaplotypeCaller \
-  -R ${REF}/b37.fasta \
-  -I alignment/NA12878/NA12878.sorted.dup.recal.bam \
-  -o variants/haplo.vcf \
-  -dt none \
-  -L 1:46000000-47600000
-```
+[note on samtools mpileup and bcftools command](notes/_mpileup.md)
 
 Now we have variants from all three methods. Let's compress and index the vcfs for futur visualisation.
 ```
@@ -651,11 +557,11 @@ Open it and choose b37 as the genome
 Open your BAM file, the tdf we just generated should load.
 Load your vcfs as well.
 
-Find an indel. What's different between the snp callers? [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_vis.ex1.md)
-Go to 1:47050562-47051207 what is interesting here?  [Solution](https://github.com/lletourn/Workshops/blob/kyoto201403/blob/solutions/_vis.ex2.md)
+Find an indel. 
 
 Look around...
 
+[Additional exercice to play with sam/bam files](add-on/sam_bam.md)
 
 ## Aknowledgments
 This tutorial is an adaptation to the one created by Louis letourneau [here](https://github.com/lletourn/Workshops/tree/kyoto201403). I would like to thank and acknowledge Louis for this help and for sharing his material. the format of the tutorial has been inspired from Mar Gonzalez Porta of Embl-EBI. I also want to acknowledge Joel Fillon, Louis Letrouneau (again), Francois Lefebvre, Maxime Caron and Guillaume Bourque for the help in building these pipelines and working with all the various datasets.
