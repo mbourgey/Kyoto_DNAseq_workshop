@@ -499,10 +499,12 @@ samtools mpileup -L 1000 -B -q 1 -g \
 
 Now we have variants from all three methods. Let's compress and index the vcfs for futur visualisation.
 ```
-for i in variants/*.vcf;do bgzip -c $i > $i.gz ; tabix -p vcf $i.gz;done
+for i bgzip -c variants/mpileup.vcf > variants/mpileup.vcf.gz 
+tabix -p vcf variants/mpileup.vcf.gz
+
 ```
 
-Let's look at a compressed vcf.
+Let's look at the compressed vcf.
 ```
 zless -S variants/mpileup.vcf.gz
 ```
@@ -510,13 +512,18 @@ zless -S variants/mpileup.vcf.gz
 Details on the spec can be found here:
 http://vcftools.sourceforge.net/specs.html
 
-Fields vary from caller to caller. Some values are more constant.
-The ref vs alt alleles, variant quality (QUAL column) and the per-sample genotype (GT) values are almost always there.
+Fields vary from caller to caller. 
+Some values are are almost always there: 
+	The ref vs alt alleles, 
+	variant quality (QUAL column)
+	the per-sample genotype (GT) values.
+
+[note on the vcf format fields](notes/_vcf1.md)
 
 # Annotations
 We typically use snpEff but many use annovar and VEP as well.
 
-Let's run snpEff
+Let's run snpEff:
 ```
 java  -Xmx6G -jar ${SNPEFF_HOME}/snpEff.jar \
   eff -v -c ${SNPEFF_HOME}/snpEff.config \
@@ -526,20 +533,25 @@ java  -Xmx6G -jar ${SNPEFF_HOME}/snpEff.jar \
   GRCh37.74 \
   variants/mpileup.vcf \
   > variants/mpileup.snpeff.vcf
-
+```
+Look at the new vcf file:
+```
 less -S variants/mpileup.snpeff.vcf
 ```
-We can see in the vcf that snpEff added a few sections. These are hard to decipher directly from the VCF other tools or scripts,
-need to be used to make sens of this.
+**Can you see the difference with the previous vcf ?**[solution](solutions/_snpeff1.md)
 
-For now we will skip this step since you will be working with gene annotations in your next workshop.
 
-Take a look at the HTML stats file snpEff created. It contains some metrics on the variants it analysed.
+For now we will not explore this step since you will be working with gene annotations in your next workshop.
 
-## Visualisation
-Before jumping into IGV, we'll generate a track IGV can use to plot coverage.
+You could also take a look at the HTML stats file snpEff created: it contains some metrics on the variants it analyzed.
 
-Try this:
+
+## Data visualisation
+The Integrative Genomics Viewer (IGV) is an efficient visualization tool for interactive exploration of large genome datasets. 
+
+![IGV browser presentation](img/igv.png)
+
+Before jumping into IGV, we'll generate a track IGV can use to plot coverage:
 
 ```
 igvtools count \
@@ -549,18 +561,46 @@ igvtools count \
   b37
 ```
 
-# IGV
-You can get IGV [here](http://www.broadinstitute.org/software/igv/download)
+Then:
 
-Open it and choose b37 as the genome
+	Open IGV
+	Chose the reference genome corresponding to those use for alignment (b37)
+	Load bam file
+	Load vcf file
 
-Open your BAM file, the tdf we just generated should load.
-Load your vcfs as well.
+Explore/play with the data: 
 
-Find an indel. 
+	find an indel
+	Look around...
 
-Look around...
+#Rational on Structural Variant calling methods
 
+What are structural variants ?
+
+![SV examples](img/SV.png) 
+
+## Read pair methods
+Identification of read pairs clusters with abnormal inserts size or orientation
+
+![PER method](img/per.png)
+
+##Depth of coverage methods
+Identification of genomic regions harbouring a lack or an excess of reads
+
+![DOC method](img/doc.png)
+
+##Split read methods
+local alignment in a targeted genomic region of unmapped ends from one-end-anchored reads
+
+![SR method](img/sr.png)
+
+##Assembly methods
+It performs a de novo assemblies followed by local permissive alignments
+
+![DN method](img/dn.png)
+
+
+#Add-on
 [Additional exercice to play with sam/bam files](add-on/sam_bam.md)
 
 ## Aknowledgments
