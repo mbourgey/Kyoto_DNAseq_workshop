@@ -1,6 +1,6 @@
 
 # Introduction to DNA-Seq processing
-This workshop will show you how to launch individual steps of a complete DNA-Seq pipeline
+In this workshop, we will present the main steps that are commonly used to process and to analyze sequencing data. We will focus only on whole genome data and provide command lines that allow detecting Single Nucleotide Variants (SNV), for a question of time we will only present the rational for the detection of Structural Variant (SV including CNV). This workshop will show you how to launch individual steps of a complete DNA-Seq pipeline
 
 We will be working on a 1000 genome sample, NA12878. You can find the whole raw data on the 1000 genome website:
 http://www.1000genomes.org/data
@@ -18,11 +18,11 @@ The initial structure of your folders should look like this:
     `-- NA12878              # One sample directory
         |-- runERR_1         # Lane directory by run number. Contains the fastqs
         `-- runSRR_1         # Lane directory by run number. Contains the fastqs
-`-- project.nanuq.csv        # sample sheet
 ```
 
-### Cheat sheets
-* [Unix comand line cheat sheet](http://sites.tufts.edu/cbi/files/2013/01/linux_cheat_sheet.pdf)
+### Cheat file
+* You can find all the unix command lines of this practical in the file: commands.sh
+
 
 ### Environment setup
 ```
