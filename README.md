@@ -490,7 +490,7 @@ Here we will just call and view the variants using the ```samtools mpileup``` fu
 mkdir variants
 samtools mpileup -L 1000 -B -q 1 -g \
 	-f ${REF}/b37.fasta \
-	-r 1:47000000-47171000 
+	-r 1:47000000-47171000 \
 	alignment/NA12878/NA12878.sorted.dup.recal.bam | bcftools call -c -  \
 	> variants/mpileup.vcf
 
@@ -499,7 +499,6 @@ samtools mpileup -L 1000 -B -q 1 -g \
 
 Now we have variants from all three methods. Let's compress and index the vcfs for futur visualisation.
 ```
-for i bgzip -c variants/mpileup.vcf > variants/mpileup.vcf.gz 
 tabix -p vcf variants/mpileup.vcf.gz
 
 ```
