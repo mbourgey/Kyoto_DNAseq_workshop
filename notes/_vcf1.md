@@ -1,6 +1,8 @@
 INFO: 
+
 	DP="Raw read depth"
-FORMAT: 
+FORMAT:
+ 
 	GT="Genotype”; 
 	PL ="List of Phred-scaled genotype likelihoods“ (min is better) ; 
 	DP ="# high-quality bases“ ; 

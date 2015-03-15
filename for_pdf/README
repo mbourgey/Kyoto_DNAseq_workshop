@@ -57,7 +57,7 @@ These are all already installed, but here are the original links.
 # First data glance
 So you've just received an email saying that your data is ready for download from the sequencing center of your choice.
 
-**What should you do ?** [solution](solutions/_data.md)
+**What should you do ?** [solution](##solutions_data)
 
 
 ### Fastq files
@@ -70,7 +70,7 @@ zless -S raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
 
 ```
 
-**Why was it like that ?** [solution](solutions/_fastq1.md)
+**Why was it like that ?** [solution](##solutions_fastq1)
 
 
 Now try these commands:
@@ -82,7 +82,7 @@ zcat raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair2.fastq.gz | head -n4
 
 **What was special about the output ?**
 
-**Why was it like that?** [Solution](solutions/_fastq2.md)
+**Why was it like that?** [Solution](##solutions_fastq2)
 
 You could also just count the reads
 
@@ -98,7 +98,7 @@ We should obtain 15546 reads
 zgrep -c "^@" raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
 ```
 
-[Solution](solutions/_fastq3.md)
+[Solution](##solutions_fastq3)
 
 
 ### Quality
@@ -130,7 +130,7 @@ scp -r <USER>@www.genome.med.kyoto-u.ac.jp:~/workshop/originalQC/ ./
 Open the images
 
 **What stands out in the graphs ?**
-[Solution](solutions/_fastqQC1.md)
+[Solution](##solutions_fastqQC1)
 
 All the generated graphics have their uses. But 2 of them are particularly useful to get an overal picture of how good or bad a run went.
 	- The Quality box plots 
@@ -138,7 +138,7 @@ All the generated graphics have their uses. But 2 of them are particularly usefu
 	- The Box plot shows the quality distribution of your data.
  
 The quality of a base is computated using the Phread quality score.
-[notes](notes/_fastQC1.md) 
+[notes](##notes_fastQC1) 
 
 
 The quality of a base is computated using the Phread quality score.
@@ -161,7 +161,7 @@ Of the raw data we see that:
    - Some reads have bad 3' ends.
    - Some reads have adapter sequences in them.
 
-**Why do we see adapters in SRR ?** [solution](solutions/_adapter1.md)
+**Why do we see adapters in SRR ?** [solution](##solutions_adapter1)
 
 Although nowadays this doesn't happen often, it does still happen. In some cases, miRNA, it is expected to have adapters.
 
@@ -177,7 +177,7 @@ The adapter file is in your work folder.
 cat adapters.fa
 ```
 
-**Why are there 2 different ones ?** [Solution](/solutions/_trim1.md)
+**Why are there 2 different ones ?** [Solution](##solutions_trim1)
 
 
 trimming with trimmomatic:
@@ -210,9 +210,9 @@ java -Xmx2G -cp $TRIMMOMATIC_JAR org.usadellab.trimmomatic.TrimmomaticPE -thread
 cat reads/NA12878/runERR_1/NA12878.ERR.trim.out reads/NA12878/runSRR_1/NA12878.SRR.trim.out
 ```
 
-[note on trimmomatic command](notes/_trimmomatic.md)
+[note on trimmomatic command](##notes_trimmomatic)
 
-**What does Trimmomatic says it did ?** [Solution](solutions/_trim2.md)
+**What does Trimmomatic says it did ?** [Solution](##solutions_trim2)
 
 Let's look at the graphs now
 
@@ -228,15 +228,15 @@ java -Xmx1G -jar ${BVATOOLS_JAR} readsqc \
   --threads 2 --regionName SRR --output postTrimQC/
 ```
 
-**How does it look now ?** [Solution](solutions/_trim3.md)
+**How does it look now ?** [Solution](##solutions_trim3)
 
 
 # Alignment
 The raw reads are now cleaned up of artefacts we can align each lane separatly.
 
-**Why should this be done separatly?** [Solution](solutions/_aln1.md)
+**Why should this be done separatly?** [Solution](##solutions_aln1)
 
-**Why is it important to set Read Group information ?** [Solution](solutions_aln2.md)
+**Why is it important to set Read Group information ?** [Solution](##solutions_aln2)
 
 ##Alignment with bwa-mem
 
@@ -265,9 +265,9 @@ bwa mem -M -t 2 \
   CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000
 ```
  
-**Why did we pipe the output of one to the other ?** [Solution](solutions/_aln3.md)
+**Why did we pipe the output of one to the other ?** [Solution](##solutions_aln3)
 
-**Could we have done it differently ?** [Solution](solutions/_aln4.md)
+**Could we have done it differently ?** [Solution](##solutions_aln4)
 
 We will explore the generated BAM latter if we get enough time.
 
@@ -300,11 +300,11 @@ samtools view -H alignment/NA12878/NA12878.sorted.bam | grep "^@RG"
 
 You should have your 2 read group entries.
 
-**Why did we use the -H switch? ** [Solution](solutions/_merge1.md)
+**Why did we use the -H switch? ** [Solution](##solutions_merge1)
 
-**Try without. What happens?** [Solution](solutions/_merge2.md)
+**Try without. What happens?** [Solution](##solutions_merge2)
 
-[lane merging note](notes/_merge1.md)
+[lane merging note](##notes_merge1)
 
 
 # Cleaning up alignments
@@ -339,9 +339,9 @@ java -Xmx2G -jar ${GATK_JAR} \
 
 ```
 
-**How could we make this go faster ?** [Solution](solutions/_realign1.md)
+**How could we make this go faster ?** [Solution](##solutions_realign1)
 
-**How many regions did it think needed cleaning ?** [Solution](solutions/_realign2.md)
+**How many regions did it think needed cleaning ?** [Solution](##solutions_realign2)
 
 
 ## FixMates
@@ -359,11 +359,11 @@ java -Xmx2G -jar ${PICARD_HOME}/FixMateInformation.jar \
 ```
 
 ## Mark duplicates
-**What are duplicate reads ?** [Solution](solutions/_markdup1.md)
+**What are duplicate reads ?** [Solution](##solutions_markdup1)
 
-**What are they caused by ?** [Solution](solutions/_markdup2.md)
+**What are they caused by ?** [Solution](##solutions_markdup2)
 
-**What are the ways to detect them ?** [Solution](solutions/_markdup3.md)
+**What are the ways to detect them ?** [Solution](##solutions_markdup3)
 
 Here we will use picards approach:
 
@@ -381,16 +381,16 @@ We can look in the metrics output to see what happened.
 less alignment/NA12878/NA12878.sorted.dup.metrics
 ```
 
-**How many duplicates were there ?** [Solution](solutions/_markdup4.md)
+**How many duplicates were there ?** [Solution](##solutions_markdup4)
 
 We can see that it computed separate measures for each library.
  
-**Why is this important to do not combine everything ?** [Solution](solutions/_markdup5.md)
+**Why is this important to do not combine everything ?** [Solution](##solutions_markdup5)
 
-[Note on Duplicate rate](notes/_marduop1.md)
+[Note on Duplicate rate](##notes_mardup1)
 
 ## Base Quality recalibration
-**Why do we need to recalibrate base quality scores ?** [Solution](solutions/_recal1.md)
+**Why do we need to recalibrate base quality scores ?** [Solution](##solutions_recal1)
 
 GATK BaseRecalibrator:
 
@@ -445,7 +445,7 @@ java  -Xmx2G -jar ${GATK_JAR} \
   -I alignment/NA12878/NA12878.sorted.dup.recal.bam \
   -L 1:47000000-47171000
 ```
-[note on DepthOfCoverage command](notes/_DOC.md)
+[note on DepthOfCoverage command](##notes_DOC)
 
 Coverage is the expected ~30x
 
@@ -455,7 +455,7 @@ Look at the coverage:
 less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
 ```
 
-**Is the coverage fit with the expectation ?** [solution](solutions/_DOC1.md)
+**Is the coverage fit with the expectation ?** [solution](##solutions_DOC1)
 
 ## Insert Size
 It corresponds to the size of DNA fragments sequenced.
@@ -482,7 +482,7 @@ less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
 
 There is something interesting going on with our library ERR.
 
-**Can you tell what it is?** [Solution](solutions/_insert1.md)
+**Can you tell what it is?** [Solution](##solutions_insert1)
 
 ## Alignment metrics
 For the alignment metrics, samtools flagstat is very fast but with bwa-mem since some reads get broken into pieces, the numbers are a bit confusing. 
@@ -505,7 +505,7 @@ less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv
 
 ```
 
-**Do you think the sample and the reference genome fit together ?** [Solution](solutions/_alnMetrics1.md)
+**Do you think the sample and the reference genome fit together ?** [Solution](##solutions_alnMetrics1)
 
 # Variant calling
 
@@ -527,7 +527,7 @@ samtools mpileup -L 1000 -B -q 1 -g \
 
 ```
 
-[note on samtools mpileup and bcftools command](notes/_mpileup.md)
+[note on samtools mpileup and bcftools command](##notes_mpileup)
 
 Now we have variants from all three methods. Let's compress and index the vcfs for futur visualisation.
 
@@ -553,7 +553,7 @@ Some values are are almost always there:
    - variant quality (QUAL column)
    - The per-sample genotype (GT) values.
 
-[note on the vcf format fields](notes/_vcf1.md)
+[note on the vcf format fields](##notes_vcf1)
 
 # Annotations
 We typically use snpEff but many use annovar and VEP as well.
@@ -577,7 +577,7 @@ Look at the new vcf file:
 less -S variants/mpileup.snpeff.vcf
 ```
 
-**Can you see the difference with the previous vcf ?**[solution](solutions/_snpeff1.md)
+**Can you see the difference with the previous vcf ?**[solution](##solutions_snpeff1)
 
 
 For now we will not explore this step since you will be working with gene annotations in your next workshop.
@@ -640,7 +640,266 @@ It performs a de novo assemblies followed by local permissive alignments
 
 
 #Add-on
-[Additional exercice to play with sam/bam files](add-on/sam_bam.md)
+[Additional exercice to play with sam/bam files](#Add-on)
 
 ## Aknowledgments
 This tutorial is an adaptation of the one created by Louis letourneau [here](https://github.com/lletourn/Workshops/tree/kyoto201403). I would like to thank and acknowledge Louis for this help and for sharing his material. the format of the tutorial has been inspired from Mar Gonzalez Porta of Embl-EBI. I also want to acknowledge Joel Fillon, Louis Letrouneau (again), Francois Lefebvre, Maxime Caron and Guillaume Bourque for the help in building these pipelines and working with all the various datasets.
+
+#Add-on
+
+## SAM/BAM
+Let's spend some time to explore bam files.
+
+try
+```
+samtools view alignment/NA12878/NA12878.sorted.bam | head -n2
+```
+
+Here you have examples of alignment results.
+A full description of the flags can be found in the SAM specification
+http://samtools.sourceforge.net/SAM1.pdf
+
+Try using picards explain flag site to understand what is going on with your reads
+http://picard.sourceforge.net/explain-flags.html
+
+The flag is the 2nd column.
+
+What do the flags of the first 2 reads mean? [Solution](##solution_sambam1)
+
+Let's take the 2nd one, the one that is in proper pair, and find it's pair.
+
+try
+```
+samtools view alignment/NA12878/NA12878.sorted.bam | grep ERR001742.6173685
+
+```
+
+Why did searching one name find both reads? [Solution](##solutions_sambam2)
+
+You can use samtools to filter reads as well.
+
+```
+# Say you want to count the *un-aligned* reads you can use
+samtools view -c -f4 alignment/NA12878/NA12878.sorted.bam
+
+# Or you want to count the *aligned* reads you can use
+samtools view -c -F4 alignment/NA12878/NA12878.sorted.bam
+
+```
+How many reads mapped and unmapped were there? [Solution](##solutions_sambam3)
+
+
+Another useful bit of information in the SAM is the CIGAR string.
+It's the 6th column in the file. This column explains how the alignment was achieved.
+M == base aligns *but doesn't have to be a match*. A SNP will have an M even if it disagrees with the reference.
+I == Insertion
+D == Deletion
+S == soft-clips. These are handy to find un removed adapters, viral insertions, etc.
+
+An in depth explanation of the CIGAR can be found [here](http://genome.sph.umich.edu/wiki/SAM)
+The exact details of the cigar string can be found in the SAM spec as well.
+Another good site
+
+#Solutions
+
+##solutions_data
+The first thing to do is download it
+
+Thee second thing is making sure it is of good quality.
+
+##solutions_fastq1
+The 4 lines of each read contain:
+ 
+    - Header 1
+    - DNA sequence
+    - Header 2
+    - Quality values
+
+##solutions_fastq2
+It's the same header with a /1 or /2 towards the end. 
+Meaning, it's paired data.
+##solutions_fastq3
+Because the ASCII quality character has @ as a valid value. If the quality line starts with this character you'll count it as a read 
+
+By this method 15926 counts are found
+##solutions_fastqQC1
+Quality drops towards the ends
+
+There seem to be spikes in the data, length and quality
+
+The SRR data set has some adapters in it
+##solutions_adapter1
+Because the sequenced molecule was shorted than the number of cycles used.
+##solutions_trim1
+Because both ends of the fragment don't have the same adapter.
+##solutions_trim2
+For ERR: Of the 67203 input pairs 92% were kept 6% had only a valid read1 0.52% had only a valid read2 0.34% were fully discarded
+
+For SRR: Of the 15546 input pairs 95% were kept 3% had only a valid read1 1% had only a valid read2 0.08% were fully discarded
+
+##solutions_trim3
+It looks better, and there is no longer any adapters.
+
+On the SRR there is a big A bias towards the 3' end of reads
+
+##solutions_aln1
+For speed, you can align each in parallel
+
+To track where the reads came from. We will set individual Read Group tags
+##solutions_aln2
+Many tools require it (not the best reason)
+
+To help differentiate lanes of sequencing in the final BAM
+
+When generating metrics, many tools can use this information to generate separate metrics
+
+##solutions_aln3
+Mostly to save IO operations and space. Piping skips the SAM generation
+
+The problem though is that more RAM and processors are needed since we sort the output automatically
+##solutions_aln4
+One option is to just generate an unsorted BAM piping bwa-mem in samtools
+
+Another option is to do it in 2 steps and pay the space cost.
+##solutions_merge1
+-H is used to only output the header of the BAM/SAM file.
+##solutions_merge2
+If it's not given the default is to skip the header and only show alignments.
+
+##solutions_realign1
+we can break up the search and realignment by chromosome
+
+##solutions_realign2
+```
+wc –l alignment/NA12878/realign.intervals
+```
+
+322 to be exact. But it does pickup all the regions with any reads with deletions.
+
+##solutions_markdup1
+Different read pairs representing the same initial DNA fragment. 
+
+##solutions_markdup2
+PCR reactions (PCR duplicates)
+Some clusters that are thought of being separate in the flowcell but are the same (optical duplicates)
+
+##solutions_markdup3
+Picard and samtools uses the alignment positions:
+ 
+   - Both 5' ends of both reads need to have the same positions. 
+   - Each reads have to be on the same strand as well.
+
+Another method is to use a kmer approach:
+  
+   - take a part of both ends of the fragment
+   - build a hash table 
+   - count the similar hits
+
+Brute force, compare all the sequences.
+
+##solutions_markdup4
+ 
+   - SRR 3% 
+   - ERR 7%
+
+##solutions_markdup5
+Each library represents a set of different DNA fragments.
+
+Each library involves different PCR reactions
+
+So PCR duplicates can not occur between fragment of two different libraries.
+
+But similar fragment could be found between libraries when the coverage is high.
+
+##solutions_recal1
+The vendors tend to inflate the values of the bases in the reads.
+ 
+The recalibration tries to lower the scores of some biased motifs for some technologies.
+
+##solutions_DOC1
+Yes the mean coverage of the region is 36x:
+
+	summaryCoverageThreshold is a useful function to see if your coverage is uniform.
+ 
+Another way is to compare the mean to the median:
+
+	If both are quite different that means something is wrong in your coverage.
+
+[note of mean vs median](##notes_DOC2)
+
+##solutions_insert1
+ERR seems to contain 2 types of libraries:
+ 
+    - PE fragments 195bp insert 
+    - Mate pair fragments 2.3kb inserts
+
+##solutions_alnMetrics1
+Yes, 96% of the reads have been aligned
+Usually, we consider: 
+ 
+   - A good alignment if > 85%
+   - Reference assembly issues if [60-85]%
+   - Probably a mismatch between sample and ref if < 60 %
+
+##solutions_snpeff1
+We can see in the vcf that snpEff added a few sections
+
+Mostly snpEff added predictions of the inpact of the variant based on known transcript positions (HIGH, MODERATE, LOW, MODIFIER, …)
+
+##solution_sambam1
+##solutions_sambam2
+##solutions_sambam3
+
+
+#Notes
+##notes_fastQC1
+In this case the reasons there are spikes and jumps in quality and length is because there are actually different libraries pooled together in the 2 fastq files. 
+
+The sequencing lengths vary between 36,50,76 bp read lengths. The Graph goes > 100 because both ends are appended one after the other.
+
+##notes_trimmomatic
+2:30:15 => <seed mismatches\>:<palindrome clipthreshold\>:<simple clip threshold\> 
+ 
+   - seedMismatches: specifies the maximum mismatch count which will still allow a full match to be performed
+   - palindromeClipThreshold: specifies how accurate the match between the two 'adapter ligated' reads must be for PE palindrome read alignment.
+   - simpleClipThreshold: specifies how accurate the match between any adapter etc. sequence must be against a read..
+
+##notes_merge1
+-h would also work which is to show alignments and the header, but when you only want the header, -H is faster.
+
+##notes_mardup1
+3% et 7%:  this is on the high side (because it is this is old data) this should be < 2% for 2-3 lanes per library
+##notes_DOC
+ 
+	--omitBaseOutput: Do not output depth of coverage at each base
+	--summaryCoverageThreshold: Coverage threshold (in percent) for summarizing statistics
+	-dt: down sampling
+	-L: interval
+
+##notes_DOC2
+A mix of WGS and WES would show very different mean and median values.
+
+##notes_mpileup
+Samtools:
+
+	-L 1000 : max per-sample depth for INDEL calling [1000] ; 
+	-B : disable BAQ (per-Base Alignment Quality) ; 
+	-q 1 : skip alignments with mapQ smaller than 1 ; 
+	-g generate genotype likelihoods in BCF format
+Bcftools :
+
+	-v output potential variant sites only
+
+##notes_vcf1
+INFO: 
+
+	DP="Raw read depth"
+FORMAT:
+ 
+	GT="Genotype”; 
+	PL ="List of Phred-scaled genotype likelihoods“ (min is better) ; 
+	DP ="# high-quality bases“ ; 
+	SP ="Phred-scaled strand bias P-value“ ; 
+	GQ ="Genotype Quality“
+
+
