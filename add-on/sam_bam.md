@@ -15,7 +15,7 @@ http://broadinstitute.github.io/picard/explain-flags.html
 
 The flag is the 2nd column.
 
-**What do the flags of the first 1st and 3rd reads mean?** [solutions](solutions/_sambam1.md)
+**What do the flags of the first 1st and 3rd reads mean?** [solutions](../solutions/_sambam1.md)
 
 Let's take the 2nd one, the one that is in proper pair, and find it's pair.
 
@@ -35,7 +35,7 @@ Or if you want to count the *aligned* reads you can use:
 samtools view -c -F4 alignment/NA12878/NA12878.sorted.bam
 ```
 
-**How many reads mapped and unmapped were there?** [solution](solutions/_sambam2.md)
+**How many reads mapped and unmapped were there?** [solution](../solutions/_sambam2.md)
 
 ## SAM/BAM CIGAR string
 Another useful bit of information in the SAM is the CIGAR string.
