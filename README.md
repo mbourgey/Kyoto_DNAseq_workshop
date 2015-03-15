@@ -28,16 +28,15 @@ The initial structure of your folders should look like this:
 
 ### Environment setup
 ```
-export PATH=$PATH:/usr/local/scr/tabix-0.2.6/:u/igvtools_2.3.31/
-export PICARD_HOME=/usr/local/bin/ 
-export SNPEFF_HOME=/usr/local/bin/  
+export PICARD_JAR=/usr/local/bin/picard.jar 
+export SNPEFF_HOME=/usr/local/src/snpEff/  
 export GATK_JAR=/usr/local/bin/GenomeAnalysisTK.jar
 export BVATOOLS_JAR=/usr/local/bin/bvatools-1.4-full.jar 
-export TRIMMOMATIC_JAR=/usr/local/bin/trimmomatic-0.32.jar 
+export TRIMMOMATIC_JAR=/usr/local/bin/trimmomatic-0.33.jar 
 export REF=/home/mBourgey/kyoto_workshop_WGS_2015/references/ 
 
 cd $HOME 
-rsync -avP /home/mBourgey/cleanCopy $HOME/workshop 
+rsync -avP /home/mBourgey/cleanCopy/ $HOME/workshop 
 cd $HOME/workshop/ 
 ```
 
@@ -249,7 +248,7 @@ bwa mem -M -t 2 \
   ${REF}/b37.fasta \
   reads/NA12878/runERR_1/NA12878.ERR.t20l32.pair1.fastq.gz \
   reads/NA12878/runERR_1/NA12878.ERR.t20l32.pair2.fastq.gz \
-  | java -Xmx2G -jar ${PICARD_HOME}/SortSam.jar \
+  | java -Xmx2G -jar ${PICARD_JAR} SortSam \
   INPUT=/dev/stdin \
   OUTPUT=alignment/NA12878/runERR_1/NA12878.ERR.sorted.bam \
   CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000
@@ -259,7 +258,7 @@ bwa mem -M -t 2 \
   ${REF}/b37.fasta \
   reads/NA12878/runSRR_1/NA12878.SRR.t20l32.pair1.fastq.gz \
   reads/NA12878/runSRR_1/NA12878.SRR.t20l32.pair2.fastq.gz \
-  | java -Xmx2G -jar ${PICARD_HOME}/SortSam.jar \
+  | java -Xmx2G -jar ${PICARD_JAR} SortSam \
   INPUT=/dev/stdin \
   OUTPUT=alignment/NA12878/runSRR_1/NA12878.SRR.sorted.bam \
   CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000
@@ -281,7 +280,7 @@ Since we identified the reads in the BAM with read groups, even after the mergin
 
 
 ```
-java -Xmx2G -jar ${PICARD_HOME}/MergeSamFiles.jar \
+java -Xmx2G -jar ${PICARD_JAR} MergeSamFiles \
   INPUT=alignment/NA12878/runERR_1/NA12878.ERR.sorted.bam \
   INPUT=alignment/NA12878/runSRR_1/NA12878.SRR.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.bam \
@@ -352,7 +351,7 @@ Why ?
 We use Picard to do this:
 
 ```
-java -Xmx2G -jar ${PICARD_HOME}/FixMateInformation.jar \
+java -Xmx2G -jar ${PICARD_JAR} FixMateInformation \
   VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000 \
   INPUT=alignment/NA12878/NA12878.realigned.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.matefixed.sorted.bam
@@ -368,7 +367,7 @@ java -Xmx2G -jar ${PICARD_HOME}/FixMateInformation.jar \
 Here we will use picards approach:
 
 ```
-java -Xmx2G -jar ${PICARD_HOME}/MarkDuplicates.jar \
+java -Xmx2G -jar ${PICARD_JAR} MarkDuplicates \
   REMOVE_DUPLICATES=false CREATE_MD5_FILE=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true \
   INPUT=alignment/NA12878/NA12878.matefixed.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.bam \
@@ -465,7 +464,7 @@ Different from the gap size (= distance between reads) !
 These metrics are computed using Picard:
 
 ```
-java -Xmx2G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar \
+java -Xmx2G -jar ${PICARD_JAR} CollectInsertSizeMetrics \
   VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/b37.fasta \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
@@ -490,7 +489,7 @@ For the alignment metrics, samtools flagstat is very fast but with bwa-mem since
 We prefer the Picard way of computing metrics:
 
 ```
-java -Xmx2G -jar ${PICARD_HOME}/CollectAlignmentSummaryMetrics.jar \
+java -Xmx2G -jar ${PICARD_JAR} CollectAlignmentSummaryMetrics \
   VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/b37.fasta \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
@@ -522,7 +521,7 @@ mkdir variants
 samtools mpileup -L 1000 -B -q 1 -g \
 	-f ${REF}/b37.fasta \
 	-r 1:47000000-47171000 \
-	alignment/NA12878/NA12878.sorted.dup.recal.bam | bcftools call -c -  \
+	alignment/NA12878/NA12878.sorted.dup.recal.bam | bcftools  view -vcg -  \
 	> variants/mpileup.vcf
 
 ```
@@ -532,6 +531,8 @@ samtools mpileup -L 1000 -B -q 1 -g \
 Now we have variants from all three methods. Let's compress and index the vcfs for futur visualisation.
 
 ```
+bgzip -c variants/mpileup.vcf > variants/mpileup.vcf.gz
+
 tabix -p vcf variants/mpileup.vcf.gz
 
 ```

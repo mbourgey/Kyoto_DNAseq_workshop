@@ -1,16 +1,16 @@
-export PATH=$PATH:TO_BE_DET_PATH/tabix-0.2.6/:TO_BE_DET_PATH/igvtools_2.3.31/
-export PICARD_HOME=/usr/local/bin/ 
-export SNPEFF_HOME=/usr/local/bin/  
+
+export PICARD_JAR=/usr/local/bin/picard.jar 
+export SNPEFF_HOME=/usr/local/src/snpEff/  
 export GATK_JAR=/usr/local/bin/GenomeAnalysisTK.jar
 export BVATOOLS_JAR=/usr/local/bin/bvatools-1.4-full.jar 
-export TRIMMOMATIC_JAR=/usr/local/bin/trimmomatic-0.32.jar 
+export TRIMMOMATIC_JAR=/usr/local/bin/trimmomatic-0.33.jar 
 export REF=/home/mBourgey/kyoto_workshop_WGS_2015/references/ 
 
 cd $HOME 
-rsync -avP /home/mBourgey/cleanCopy $HOME/workshop 
+rsync -avP /home/mBourgey/cleanCopy/ $HOME/workshop 
 cd $HOME/workshop/ 
 
-#zless -S raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
+zless -S raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz
 
 zcat raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair1.fastq.gz | head -n4
 zcat raw_reads/NA12878/runSRR_1/NA12878.SRR.33.pair2.fastq.gz | head -n4
@@ -84,7 +84,7 @@ bwa mem -M -t 2 \
   ${REF}/b37.fasta \
   reads/NA12878/runERR_1/NA12878.ERR.t20l32.pair1.fastq.gz \
   reads/NA12878/runERR_1/NA12878.ERR.t20l32.pair2.fastq.gz \
-  | java -Xmx2G -jar ${PICARD_HOME}/SortSam.jar \
+  | java -Xmx2G -jar ${PICARD_JAR} SortSam \
   INPUT=/dev/stdin \
   OUTPUT=alignment/NA12878/runERR_1/NA12878.ERR.sorted.bam \
   CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000
@@ -94,13 +94,13 @@ bwa mem -M -t 2 \
   ${REF}/b37.fasta \
   reads/NA12878/runSRR_1/NA12878.SRR.t20l32.pair1.fastq.gz \
   reads/NA12878/runSRR_1/NA12878.SRR.t20l32.pair2.fastq.gz \
-  | java -Xmx2G -jar ${PICARD_HOME}/SortSam.jar \
+  | java -Xmx2G -jar ${PICARD_JAR} SortSam  \
   INPUT=/dev/stdin \
   OUTPUT=alignment/NA12878/runSRR_1/NA12878.SRR.sorted.bam \
   CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000
 
 
-java -Xmx2G -jar ${PICARD_HOME}/MergeSamFiles.jar \
+java -Xmx2G -jar ${PICARD_JAR} MergeSamFiles \
   INPUT=alignment/NA12878/runERR_1/NA12878.ERR.sorted.bam \
   INPUT=alignment/NA12878/runSRR_1/NA12878.SRR.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.bam \
@@ -127,19 +127,19 @@ java -Xmx2G -jar ${GATK_JAR} \
 
 
 
-java -Xmx2G -jar ${PICARD_HOME}/FixMateInformation.jar \
+java -Xmx2G -jar ${PICARD_JAR} FixMateInformation \
   VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=500000 \
   INPUT=alignment/NA12878/NA12878.realigned.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.matefixed.sorted.bam
 
 
-java -Xmx2G -jar ${PICARD_HOME}/MarkDuplicates.jar \
+java -Xmx2G -jar ${PICARD_JAR} MarkDuplicates \
   REMOVE_DUPLICATES=false CREATE_MD5_FILE=true VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true \
   INPUT=alignment/NA12878/NA12878.matefixed.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.bam \
   METRICS_FILE=alignment/NA12878/NA12878.sorted.dup.metrics
 
-#less alignment/NA12878/NA12878.sorted.dup.metrics
+less alignment/NA12878/NA12878.sorted.dup.metrics
 
 java -Xmx2G -jar ${GATK_JAR} \
   -T BaseRecalibrator \
@@ -173,10 +173,10 @@ java  -Xmx2G -jar ${GATK_JAR} \
   -L 1:47000000-47171000
 
 
-#less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
+less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
 
 
-java -Xmx2G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar \
+java -Xmx2G -jar ${PICARD_JAR} CollectInsertSizeMetrics \
   VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/b37.fasta \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
@@ -185,30 +185,31 @@ java -Xmx2G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar \
   METRIC_ACCUMULATION_LEVEL=LIBRARY
 
 
-#less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
+less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
 
-java -Xmx2G -jar ${PICARD_HOME}/CollectAlignmentSummaryMetrics.jar \
+java -Xmx2G -jar ${PICARD_JAR} CollectAlignmentSummaryMetrics \
   VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/b37.fasta \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv \
   METRIC_ACCUMULATION_LEVEL=LIBRARY
 
-#less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv
+less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv
 
 mkdir variants
 samtools mpileup -L 1000 -B -q 1 -g \
 	-f ${REF}/b37.fasta \
 	-r 1:47000000-47171000 \
-	alignment/NA12878/NA12878.sorted.dup.recal.bam | bcftools call -c -  \
+	alignment/NA12878/NA12878.sorted.dup.recal.bam | bcftools view -vcg -  \
 	> variants/mpileup.vcf
 
 
+bgzip -c variants/mpileup.vcf > variants/mpileup.vcf.gz
 tabix -p vcf variants/mpileup.vcf.gz
 
 
 
-#zless -S variants/mpileup.vcf.gz
+zless -S variants/mpileup.vcf.gz
 
 java  -Xmx6G -jar ${SNPEFF_HOME}/snpEff.jar \
   eff -v -c ${SNPEFF_HOME}/snpEff.config \
@@ -220,7 +221,7 @@ java  -Xmx6G -jar ${SNPEFF_HOME}/snpEff.jar \
   > variants/mpileup.snpeff.vcf
 
 
-#less -S variants/mpileup.snpeff.vcf
+less -S variants/mpileup.snpeff.vcf
 
 
 igvtools count \
@@ -229,3 +230,11 @@ igvtools count \
   alignment/NA12878/NA12878.sorted.dup.recal.bam.tdf \
   b37
 
+####Add-on
+
+samtools view alignment/NA12878/NA12878.sorted.bam | head –n4
+
+samtools view -c -f4 alignment/NA12878/NA12878.sorted.bam
+
+
+samtools view -c -F4 alignment/NA12878/NA12878.sorted.bam

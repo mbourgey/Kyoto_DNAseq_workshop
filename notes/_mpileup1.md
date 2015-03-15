@@ -7,3 +7,6 @@ Samtools:
 Bcftools :
 
 	-v output potential variant sites only
+	-c SNP calling (force –e : likelihood based analyses)
+	-g call genotypes at variant sites
+
