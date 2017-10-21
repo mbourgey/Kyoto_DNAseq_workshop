@@ -59,23 +59,23 @@ These are all already installed, but here are the original links.
 
 ```
 #set up
-echo "export MUGQIC_INSTALL_HOME=/cvmfs/soft.mugqic/CentOS6" >> ~/.bashrc
-echo "module use $MUGQIC_INSTALL_HOME/modulefiles"  >> ~/.bashrc
+export SOFT_DIR=/usr/local/bin
+export WORK_DIR=$HOME/workshop/VariantCalling
 
-source ${HOME}/.bashrc
-
-export REF=$MUGQIC_INSTALL_HOME/genomes/species/Homo_sapiens.GRCh37/
-export WORK_DIR="${HOME}/bfx_genomic_medecine/module2"
-
-module load mugqic/java/openjdk-jdk1.8.0_72 mugqic/bvatools/1.6 mugqic/samtools/1.4 
-module load mugqic/bwa/0.7.12 mugqic/GenomeAnalysisTK/3.7 mugqic/picard/1.123 
-module load mugqic/trimmomatic/0.36 mugqic/R_Bioconductor/3.3.2_3.4
+export TRIMMOMATIC_JAR=$SOFT_DIR/trimmomatic.jar
+export PICARD_JAR=$SOFT_DIR/picard.jar
+export GATK_JAR=$SOFT_DIR/GenomeAnalysisTK.jar
+export BVATOOLS_JAR=$SOFT_DIR/bvatools-full.jar
+export SNPEFF_HOME=/usr/local/src/snpEff/
+export SNPEFF_JAR=$SNPEFF_HOME/snpEff.jar
+export REF=$WORK_DIR/reference/
 
 
 rm -rf $WORK_DIR
 mkdir -p $WORK_DIR
 cd $WORK_DIR
-ln -s /home/partage/genomic_medecine/Module2/* .
+ln -s /home/mBourgey/cleanCopy/* . ##TO UPDATE
+
 ```
 
 ### Data files
@@ -129,23 +129,6 @@ zcat raw_reads/NA12878/NA12878_CBW_chr1_R2.fastq.gz | head -n4
 **What was special about the output and why was it like that?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_fastq2.md)
 
 
-You could also count the reads
-
-```
-zgrep -c "^@SN1114" raw_reads/NA12878/NA12878_CBW_chr1_R1.fastq.gz
-```
-
-We found  56512 reads
-
-**Why shouldn't you just do?**
-
-```
-zgrep -c "^@" raw_reads/NA12878/NA12878_CBW_chr1_R1.fastq.gz
-```
-
-[solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_fastq3.md)
-
-
 ### Quality
 
 We can't look at all the reads. Especially when working with whole genome 30x data. You could easilly have Billions of reads.
@@ -162,7 +145,12 @@ java -Xmx8G -jar ${BVATOOLS_JAR} readsqc \
   --threads 1 --regionName ACTL8 --output originalQC/
 ```
 
-TOCHANGE scp or ssh -X open a web browser on your laptop, and navigate to `http://cbwXX.dyndns.info/`, where `XX` is the id of your node. You should be able to find there the directory hierarchy under `~/workspace/` on your node. open ```originalQC``` folder and open the images.
+Copy the images from the originalQC folder to your desktop and open the images.
+
+```
+scp -r <USER>@www.genome.med.kyoto-u.ac.jp:$WORK_DIR/originalQC/ ./
+```
+
 
 
 **What stands out in the graphs?**
@@ -288,9 +276,6 @@ bwa mem -M -t 2 \
 The details of the fields can be found in the SAM/BAM specifications [Here](http://samtools.sourceforge.net/SAM1.pdf)
 For most cases, only the sample name, platform unit and library one are important. 
 
-**Why did we pipe the output of one to the other? Could we have done it differently?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_aln3.md)
-
-
 
 ### Lane merging (optional)
 
@@ -356,11 +341,12 @@ An in depth explanation of the CIGAR can be found [here](http://genome.sph.umich
 The exact details of the cigar string can be found in the SAM spec as well.
 Another good site
 
+
 ## Cleaning up alignments
 
 We started by cleaning up the raw reads. Now we need to fix and clean some alignments.
 
-### Indel realignment
+### Indel realignment (optional if you use GATK HaplotypeCaller variant caller)
 
 The first step for this is to realign around indels and snp dense regions.
 The Genome Analysis toolkit has a tool for this called IndelRealigner.
@@ -391,22 +377,6 @@ java -Xmx8G -jar ${GATK_JAR} \
 
 **How many regions did it think needed cleaning?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_realign2.md)
 
-### FixMates (optional)
-
-This step shouldn't be necessary...But it is some time.
-
-This goes through the BAM file and find entries which don't have their mate information written properly.
-
-This used to be a problem in the GATKs realigner, but they fixed it. It shouldn't be a problem with aligners like BWA, but there are always corner cases that create one-off corrdinates and such.
-
-This happened a lot with bwa backtrack. This happens less with bwa mem and recent GATK so we will skip today.
-
-```
-#java -Xmx8G -jar ${PICARD_HOME}/FixMateInformation.jar \
-#VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=1500000 \
-#INPUT=alignment/NA12878/NA12878.realigned.sorted.bam \
-#OUTPUT=alignment/NA12878/NA12878.matefixed.sorted.bam
-```
 
 ### Mark duplicates
 
@@ -476,7 +446,8 @@ java -Xmx8G -jar ${GATK_JAR} \
 
 Once your whole bam is generated, it's always a good thing to check the data again to see if everything makes sens.
 
-### Compute coverage
+
+### Compute coverage (optional in the workshop)
 
 If you have data from a capture kit, you should see how well your targets worked
 
@@ -510,7 +481,7 @@ Coverage is the expected ~30x.
 summaryCoverageThreshold is a usefull function to see if your coverage is uniform.
 Another way is to compare the mean to the median. If both are almost equal, your coverage is pretty flat. If both are quite different, that means something is wrong in your coverage. A mix of WGS and WES would show very different mean and median values.
 
-### Insert Size
+### Insert Size (optional in the workshop)
 
 ```
 java -Xmx8G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar \
@@ -529,7 +500,7 @@ less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
 
 **Is the insert-size important ?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_insert2.md)
 
-### Alignment metrics
+### Alignment metrics (optional in the workshop)
 
 For the alignment metrics, we used to use ```samtools flagstat``` but with bwa mem since some reads get broken into pieces, the numbers are a bit confusing.
 You can try it if you want.
@@ -563,15 +534,10 @@ Let's call SNPs in NA12878 using both the original and the improved bam files:
 
 ```
 mkdir -p variants/
-#NA12878.sort.rmdup.realign
 java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
--I bam/NA12878/NA12878.bwa.sort.bam  --variant_index_type LINEAR --variant_index_parameter 128000 -dt none \
+-I alignment/NA12878/NA12878.sorted.dup.recal.bam  --variant_index_type LINEAR --variant_index_parameter 128000 -dt none \
 -o variants/NA12878.hc.vcf -L 1:17704860-18004860
 
-#NA12878.sort.rmdup.realign
-java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
--I bam/NA12878/NA12878.bwa.sort.rmdup.realign.bam  --variant_index_type LINEAR --variant_index_parameter 128000 -dt none \
--o variants/NA12878.rmdup.realign.hc.vcf -L 1:17704860-18004860
 ```
 
 `-Xmx8g` instructs java to allow up 2 GB of RAM to be used for GATK.
@@ -604,7 +570,7 @@ To perform more rigorous filtering, another program must be used. In our case, w
 
 ```
 java -Xmx8g -jar $GATK_JAR -T VariantFiltration \
--R ${REF}/genome/Homo_sapiens.GRCh37.fa --variant variants/NA12878.rmdup.realign.hc.vcf -o variants/NA12878.rmdup.realign.hc.filter.vcf --filterExpression "QD < 2.0" \
+-R ${REF}/genome/Homo_sapiens.GRCh37.fa --variant variants/NA12878.hc.vcf -o variants/NA12878.hc.filter.vcf --filterExpression "QD < 2.0" \
 --filterExpression "FS > 200.0" \
 --filterExpression "MQ < 40.0" \
 --filterName QDFilter \
@@ -625,7 +591,7 @@ java -Xmx8g -jar $GATK_JAR -T VariantFiltration \
 
 `--filterName` defines what the filter field should display if that filter is true. 
 
-**What is QD, FS, and MQ?**  [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_filter1.md)
+**What is QD, FS, and MQ?**  [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_filter1.md)
 
 
 
@@ -640,8 +606,8 @@ We typically use SnpEff but many use Annovar and VEP as well.
 
 Let's run snpEff
 ```
-java -Xmx8G -jar ${SNPEFF_HOME}/snpEff.jar eff  -v -no-intergenic \
--i vcf -o vcf GRCh37.75 variants/NA12878.rmdup.realign.hc.filter.vcf >  variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf
+java -Xmx8G -jar $SNPEFF_JAR eff  -v -no-intergenic \
+-i vcf -o vcf GRCh37.75 variants/NA12878.hc.filter.vcf >  variants/NA12878.hc.filter.snpeff.vcf
 ```
 
 
@@ -685,16 +651,10 @@ Here's an example of a typical annotation:
 
 `ANN=C|intron_variant|MODIFIER|PADI6|PADI6|transcript|NM_207421.4|Coding|5/16|c.553+80T>C||||||`
 
-**What does the example annotation actually mean?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_snpEff1.md)
+**What does the example annotation actually mean?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_snpEff1.md)
 
-Next, you should view or download the report generated by snpEff.
+additionally, you could download and look at the report generated by snpEff `snpEff_summary.html`.
 
-Use the procedure described previously to retrieve:
-
-`snpEff_summary.html`
-
- 
-Next, open the file in any web browser.
 
 
 ### Finding impactful variants
@@ -702,14 +662,11 @@ Next, open the file in any web browser.
 One nice feature in snpEff is that it tries to assess the impact of each variant. You can read more about the effect categories [here](http://snpeff.sourceforge.net/VCFannotationformat_v1.0.pdf).
 
 
-**How many variants had a high impact?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_snpEff2.md)
-
-
-**What effect categories were represented in these variants?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_snpEff3.md)
+**How many variants had a high impact?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_snpEff2.md)
 
 
 
-**How many variants had a moderate impact? What effect categories were represented in these variants?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_snpEff5.md)
+**How many variants had a moderate impact?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_snpEff5.md)
 
 ## Adding dbSNP annotations
 <a name="dbSNP"></a>
@@ -720,7 +677,7 @@ Go back to looking at your last vcf file:
 less -S variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf
 ```
 
-**What do you see in the third column?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_annot1.md)
+**What do you see in the third column?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_annot1.md)
 
 The third column in the vcf file is reserved for identifiers. Perhaps the most common identifier is the dbSNP rsID.
 
@@ -745,10 +702,9 @@ java -Xmx8g -jar $GATK_JAR -T VariantAnnotator -R ${REF}/genome/Homo_sapiens.GRC
 
 `-L` defines which regions we should annotate. In this case, I chose the chromosomes that contain the regions we are investigating. 
 
-**What percentage of the variants that passed all filters were also in dbSNP?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_annot2.md)
 
 
-**Can you find a variant that passed and wasn't in dbSNP?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_annot3.md)
+**Can you find a variant that passed and wasn't in dbSNP?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_annot3.md)
 
 
 ## (Optional 1) Use IGV to investigate the SNPs
@@ -768,10 +724,10 @@ After that you need to follow the steps as in Option 1 except that you need to l
 
 Finally, go to a region on chromsome 1 with reads (chr1:17704860-18004860) and spend some time SNP gazing...
 
-**Do the SNPs look believable?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_igv1.md)
+**Do the SNPs look believable?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_igv1.md)
 
 
-**Are there any positions that you think should have been called as a SNP, but weren't?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_igv2.md)
+**Are there any positions that you think should have been called as a SNP, but weren't?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_igv2.md)
 
 
 ## (Optional 2) Investigating the trio
@@ -781,13 +737,13 @@ At this point we have aligned and called variants in one individual. However, we
 
 As additional practice, perform the same steps for the other two individuals (her parents): NA12891 and NA12892. Here are some additional things that you might want to look at:
 
- 1. **If you load up all three realigned BAM files and all three final vcf files into IGV, do the variants look plausible?** Use a [Punnett square](https://en.wikipedia.org/wiki/Punnett_square) to help evaluate this. i.e. if both parents have a homozygous reference call and the child has a homozygous variant call at that locus, this might indicate a trio conflict. [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_trio1.md)
+ 1. **If you load up all three realigned BAM files and all three final vcf files into IGV, do the variants look plausible?** Use a [Punnett square](https://en.wikipedia.org/wiki/Punnett_square) to help evaluate this. i.e. if both parents have a homozygous reference call and the child has a homozygous variant call at that locus, this might indicate a trio conflict. [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_trio1.md)
 
- 2. **Do you find any additional high or moderate impact variants in either of the parents?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_trio2.md)
+ 2. **Do you find any additional high or moderate impact variants in either of the parents?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_trio2.md)
 
- 3. **Do all three family members have the same genotype for Rs7538876 and Rs2254135?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_trio3.md)
+ 3. **Do all three family members have the same genotype for Rs7538876 and Rs2254135?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_trio3.md)
 
- 4. GATK produces even better variant calling results if all three BAM files are specified at the same time (i.e. specifying multiple `-I filename` options). Try this and then perform the rest of module 5 on the trio vcf file. **Does this seem to improve your variant calling results? Does it seem to reduce the trio conflict rate?** [solution](https://github.com/mbourgey/CBW_BFX_GENOMIC_MEDECINE_module3/blob/master/solutions/_trio4.md)
+ 4. GATK produces even better variant calling results if all three BAM files are specified at the same time (i.e. specifying multiple `-I filename` options). Try this and then perform the rest of module 5 on the trio vcf file. **Does this seem to improve your variant calling results? Does it seem to reduce the trio conflict rate?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_trio4.md)
 
 
 ## Summary
