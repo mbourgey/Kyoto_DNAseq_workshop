@@ -606,7 +606,7 @@ We typically use SnpEff but many use Annovar and VEP as well.
 Let's run snpEff
 ```
 java -Xmx8G -jar $SNPEFF_JAR eff  -v -no-intergenic \
--i vcf -o vcf GRCh37.75 variants/NA12878.hc.filter.vcf >  variants/NA12878.hc.filter.snpeff.vcf
+-i vcf -o vcf hg19 variants/NA12878.hc.filter.vcf >  variants/NA12878.hc.filter.snpeff.vcf
 ```
 
 
