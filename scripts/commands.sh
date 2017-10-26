@@ -76,7 +76,7 @@ java -Xmx8G  -jar ${GATK_JAR} \
   -R ${REF}/hg19.fa \
   -o alignment/NA12878/realign.intervals \
   -I alignment/NA12878/NA12878.sorted.bam \
-  -L 1
+  -L chr1
 
 java -Xmx8G -jar ${GATK_JAR} \
   -T IndelRealigner \
@@ -95,8 +95,8 @@ java -Xmx8G -jar ${PICARD_JAR} MarkDuplicates \
 java -Xmx8G -jar ${GATK_JAR} \
   -T BaseRecalibrator \
   -R ${REF}/hg19.fa \
-  -knownSites ${REF}/annotations/Homo_sapiens.GRCh37.dbSNP142.vcf.gz \
-  -L 1:17700000-18100000 \
+  -knownSites ${REF}/dbSNP_135_chr1.vcf.gz \
+  -L chr1:17700000-18100000 \
   -o alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp \
   -I alignment/NA12878/NA12878.sorted.dup.bam
 
@@ -146,7 +146,7 @@ java -Xmx8G -jar ${PICARD_JAR} CollectAlignmentSummaryMetrics \
 mkdir -p variants/
 java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/hg19.fa \
 -I alignment/NA12878/NA12878.sorted.dup.recal.bam  --variant_index_type LINEAR --variant_index_parameter 128000 -dt none \
--o variants/NA12878.hc.vcf -L 1:17704860-18004860
+-o variants/NA12878.hc.vcf -L chr1:17704860-18004860
 
 java -Xmx8g -jar $GATK_JAR -T VariantFiltration \
 -R ${REF}/hg19.fa --variant variants/NA12878.hc.vcf -o variants/NA12878.hc.filter.vcf --filterExpression "QD < 2.0" \
@@ -163,5 +163,5 @@ java -Xmx8G -jar $SNPEFF_JAR eff  -v -no-intergenic \
 
 java -Xmx8g -jar $GATK_JAR -T VariantAnnotator -R ${REF}/hg19.fa \
 --dbsnp $REF/annotations/Homo_sapiens.GRCh37.dbSNP142.vcf.gz --variant variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf \
--o variants/NA12878.rmdup.realign.hc.filter.snpeff.dbsnp.vcf -L 1:17704860-18004860
+-o variants/NA12878.rmdup.realign.hc.filter.snpeff.dbsnp.vcf -L chr1:17704860-18004860
 
