@@ -264,7 +264,7 @@ bwa mem -M -t 2 \
   ${REF}/genome/bwa_index/Homo_sapiens.GRCh37.fa \
   reads/NA12878/NA12878_CBW_chr1_R1.t20l32.fastq.gz \
   reads/NA12878/NA12878_CBW_chr1_R2.t20l32.fastq.gz \
-  | java -Xmx8G -jar ${PICARD_HOME}/SortSam.jar \
+  | java -Xmx8G -jar ${PICARD_JAR} SortSam \
   INPUT=/dev/stdin \
   OUTPUT=alignment/NA12878/NA12878.sorted.bam \
   CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=1500000
@@ -391,7 +391,7 @@ As the step says, this is to mark duplicate reads.
 Here we will use picards approach:
 
 ```
-java -Xmx8G -jar ${PICARD_HOME}/MarkDuplicates.jar \
+java -Xmx8G -jar ${PICARD_JAR} MarkDuplicates \
   REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true \
   INPUT=alignment/NA12878/NA12878.realigned.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.bam \
@@ -483,7 +483,7 @@ Another way is to compare the mean to the median. If both are almost equal, your
 ### Insert Size (optional in the workshop)
 
 ```
-java -Xmx8G -jar ${PICARD_HOME}/CollectInsertSizeMetrics.jar \
+java -Xmx8G -jar ${PICARD_JAR} CollectInsertSizeMetrics \
   VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/genome/Homo_sapiens.GRCh37.fa \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
@@ -507,7 +507,7 @@ You can try it if you want.
 We prefer the Picard way of computing metrics
 
 ```
-java -Xmx8G -jar ${PICARD_HOME}/CollectAlignmentSummaryMetrics.jar \
+java -Xmx8G -jar ${PICARD_JAR} CollectAlignmentSummaryMetrics  \
   VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/genome/Homo_sapiens.GRCh37.fa \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
