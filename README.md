@@ -261,7 +261,7 @@ mkdir -p alignment/NA12878/
 
 bwa mem -M -t 2 \
   -R '@RG\tID:NA12878\tSM:NA12878\tLB:NA12878\tPU:runNA12878_1\tCN:Broad Institute\tPL:ILLUMINA' \
-  ${REF}/genome/bwa_index/Homo_sapiens.GRCh37.fa \
+  ${REF}/hg19.fa\
   reads/NA12878/NA12878_CBW_chr1_R1.t20l32.fastq.gz \
   reads/NA12878/NA12878_CBW_chr1_R2.t20l32.fastq.gz \
   | java -Xmx8G -jar ${PICARD_JAR} SortSam \
@@ -358,14 +358,14 @@ It basically runs in 2 steps
 ```
 java -Xmx8G  -jar ${GATK_JAR} \
   -T RealignerTargetCreator \
-  -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
+  -R ${REF}/hg19.fa\
   -o alignment/NA12878/realign.intervals \
   -I alignment/NA12878/NA12878.sorted.bam \
   -L 1
 
 java -Xmx8G -jar ${GATK_JAR} \
   -T IndelRealigner \
-  -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
+  -R ${REF}/hg19.fa\
   -targetIntervals alignment/NA12878/realign.intervals \
   -o alignment/NA12878/NA12878.realigned.sorted.bam \
   -I alignment/NA12878/NA12878.sorted.bam
@@ -426,7 +426,7 @@ It runs in 2 steps,
 ```
 java -Xmx8G -jar ${GATK_JAR} \
   -T BaseRecalibrator \
-  -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
+  -R ${REF}/hg19.fa\
   -knownSites ${REF}/annotations/Homo_sapiens.GRCh37.dbSNP142.vcf.gz \
   -L 1:17700000-18100000 \
   -o alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp \
@@ -434,7 +434,7 @@ java -Xmx8G -jar ${GATK_JAR} \
 
 java -Xmx8G -jar ${GATK_JAR} \
   -T PrintReads \
-  -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
+  -R ${REF}/hg19.fa\
   -BQSR alignment/NA12878/NA12878.sorted.dup.recalibration_report.grp \
   -o alignment/NA12878/NA12878.sorted.dup.recal.bam \
   -I alignment/NA12878/NA12878.sorted.dup.bam
@@ -466,7 +466,7 @@ java  -Xmx8G -jar ${GATK_JAR} \
   --summaryCoverageThreshold 50 \
   --summaryCoverageThreshold 100 \
   --start 1 --stop 500 --nBins 499 -dt NONE \
-  -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
+  -R ${REF}/hg19.fa\
   -o alignment/NA12878/NA12878.sorted.dup.recal.coverage \
   -I alignment/NA12878/NA12878.sorted.dup.recal.bam \
   -L  1:17700000-18100000
@@ -485,7 +485,7 @@ Another way is to compare the mean to the median. If both are almost equal, your
 ```
 java -Xmx8G -jar ${PICARD_JAR} CollectInsertSizeMetrics \
   VALIDATION_STRINGENCY=SILENT \
-  REFERENCE_SEQUENCE=${REF}/genome/Homo_sapiens.GRCh37.fa \
+  REFERENCE_SEQUENCE=${REF}/hg19.fa\
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv \
   HISTOGRAM_FILE=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.histo.pdf \
@@ -509,7 +509,7 @@ We prefer the Picard way of computing metrics
 ```
 java -Xmx8G -jar ${PICARD_JAR} CollectAlignmentSummaryMetrics  \
   VALIDATION_STRINGENCY=SILENT \
-  REFERENCE_SEQUENCE=${REF}/genome/Homo_sapiens.GRCh37.fa \
+  REFERENCE_SEQUENCE=${REF}/hg19.fa\
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv \
   METRIC_ACCUMULATION_LEVEL=LIBRARY
@@ -533,7 +533,7 @@ Let's call SNPs in NA12878 using both the original and the improved bam files:
 
 ```
 mkdir -p variants/
-java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
+java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/hg19.fa\
 -I alignment/NA12878/NA12878.sorted.dup.recal.bam  --variant_index_type LINEAR --variant_index_parameter 128000 -dt none \
 -o variants/NA12878.hc.vcf -L 1:17704860-18004860
 
@@ -569,7 +569,7 @@ To perform more rigorous filtering, another program must be used. In our case, w
 
 ```
 java -Xmx8g -jar $GATK_JAR -T VariantFiltration \
--R ${REF}/genome/Homo_sapiens.GRCh37.fa --variant variants/NA12878.hc.vcf -o variants/NA12878.hc.filter.vcf --filterExpression "QD < 2.0" \
+-R ${REF}/hg19.fa--variant variants/NA12878.hc.vcf -o variants/NA12878.hc.filter.vcf --filterExpression "QD < 2.0" \
 --filterExpression "FS > 200.0" \
 --filterExpression "MQ < 40.0" \
 --filterName QDFilter \
@@ -683,7 +683,7 @@ The third column in the vcf file is reserved for identifiers. Perhaps the most c
 Use the following command to generate dbSNP rsIDs for our vcf file: 
 
 ```
-java -Xmx8g -jar $GATK_JAR -T VariantAnnotator -R ${REF}/genome/Homo_sapiens.GRCh37.fa \
+java -Xmx8g -jar $GATK_JAR -T VariantAnnotator -R ${REF}/hg19.fa\
 --dbsnp $REF/annotations/Homo_sapiens.GRCh37.dbSNP142.vcf.gz --variant variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf \
 -o variants/NA12878.rmdup.realign.hc.filter.snpeff.dbsnp.vcf -L 1:17704860-18004860
 ```
