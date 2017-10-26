@@ -469,7 +469,7 @@ java  -Xmx8G -jar ${GATK_JAR} \
   -R ${REF}/hg19.fa\
   -o alignment/NA12878/NA12878.sorted.dup.recal.coverage \
   -I alignment/NA12878/NA12878.sorted.dup.recal.bam \
-  -L  1:17700000-18100000
+  -L chr1:17700000-18100000
 
 #### Look at the coverage
 less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
