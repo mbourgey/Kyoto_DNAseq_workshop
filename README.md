@@ -74,8 +74,7 @@ export REF=$WORK_DIR/reference/
 rm -rf $WORK_DIR
 mkdir -p $WORK_DIR
 cd $WORK_DIR
-ln -s /home/mBourgey/cleanCopy/* . ##TO UPDATE
-
+ln -s /home/mathieu/cleanCopy/* .
 ```
 
 ### Data files

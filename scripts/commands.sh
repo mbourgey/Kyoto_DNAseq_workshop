@@ -14,7 +14,7 @@ export REF=$WORK_DIR/reference/
 rm -rf $WORK_DIR
 mkdir -p $WORK_DIR
 cd $WORK_DIR
-ln -s /home/mBourgey/cleanCopy/* . ##TO UPDATE
+ln -s /home/mathieu/cleanCopy/* . 
 
 #zless -S raw_reads/NA12878/NA12878_CBW_chr1_R1.fastq.gz
 
