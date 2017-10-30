@@ -622,9 +622,9 @@ java -Xmx8G -jar $SNPEFF_JAR eff  -v -no-intergenic \
 
 `hg19` specifies that we want to use the hg19 annotation database. 
 
-`variants/NA12878.rmdup.realign.hc.filter.vcf` specifies our input vcf filename 
+`variants/NA12878.hc.filter.vcf` specifies our input vcf filename 
 
-`variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf` specifies our output vcf filename 
+`variants/NA12878..hc.filter.snpeff.vcf` specifies our output vcf filename 
 
 
 ## Investigating the functional consequence of variants
@@ -635,7 +635,7 @@ You can learn more about the meaning of snpEff annotations [here](http://snpeff.
 Use less to look at the new vcf file: 
 
 ```
-less -S variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf
+less -S variants/NA12878.hc.filter.snpeff.vcf
 ```
 
 We can see in the vcf that snpEff added few sections. These are hard to decipher directly from the VCF other tools or scripts, need to be used to make sens of this.
@@ -673,7 +673,7 @@ One nice feature in snpEff is that it tries to assess the impact of each variant
 Go back to looking at your last vcf file:
 
 ```
-less -S variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf
+less -S variants/NA12878.hc.filter.snpeff.vcf
 ```
 
 **What do you see in the third column?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_annot1.md)
@@ -683,9 +683,10 @@ The third column in the vcf file is reserved for identifiers. Perhaps the most c
 Use the following command to generate dbSNP rsIDs for our vcf file: 
 
 ```
-java -Xmx8g -jar $GATK_JAR -T VariantAnnotator -R ${REF}/hg19.fa\
---dbsnp $REF/annotations/Homo_sapiens.GRCh37.dbSNP142.vcf.gz --variant variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf \
--o variants/NA12878.rmdup.realign.hc.filter.snpeff.dbsnp.vcf -L chr1:17704860-18004860
+java -Xmx8g -jar $GATK_JAR -T VariantAnnotator -R ${REF}/hg19.fa \
+--dbsnp $REF/dbSNP_135_chr1.vcf.gz --variant variants/NA12878.hc.filter.snpeff.vcf \
+-o variants/NA12878.hc.filter.snpeff.dbsnp.vcf -L chr1:17704860-18004860
+
 ```
 
 

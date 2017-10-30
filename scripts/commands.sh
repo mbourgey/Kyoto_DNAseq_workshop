@@ -158,10 +158,10 @@ java -Xmx8g -jar $GATK_JAR -T VariantFiltration \
 
 java -Xmx8G -jar $SNPEFF_JAR eff  -v -no-intergenic \
 -i vcf -o vcf hg19 variants/NA12878.hc.filter.vcf >  variants/NA12878.hc.filter.snpeff.vcf
-#less -S variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf
-#less -S variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf
+#less -S variants/NA12878.hc.filter.snpeff.vcf
+#less -S variants/NA12878.hc.filter.snpeff.vcf
 
 java -Xmx8g -jar $GATK_JAR -T VariantAnnotator -R ${REF}/hg19.fa \
---dbsnp $REF/annotations/Homo_sapiens.GRCh37.dbSNP142.vcf.gz --variant variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf \
--o variants/NA12878.rmdup.realign.hc.filter.snpeff.dbsnp.vcf -L chr1:17704860-18004860
+--dbsnp $REF/dbSNP_135_chr1.vcf.gz --variant variants/NA12878.hc.filter.snpeff.vcf \
+-o variants/NA12878.hc.filter.snpeff.dbsnp.vcf -L chr1:17704860-18004860
 
