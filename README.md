@@ -21,7 +21,6 @@ NA12878 is the child of the trio while NA12891 and NA12892 are her parents.
 
 If you finish early, feel free to perform the same steps on the other two individuals: NA12891 & NA12892. 
 
-[The analysis of NA12891 & NA12892 will be done during the Integrated Assignment session](https://github.com/bioinformaticsdotca/HT-Biology_2017/blob/master/HtSeq/Integrated_assignment.md)
 
 For practical reasons we subsampled the reads from the sample because running the whole dataset would take way too much time and resources.
 We're going to focus on the reads extracted from a 300 kbp stretch of chromosome 1
@@ -302,17 +301,6 @@ The flag is the 2nd column.
 
 **What do the flags of the first 4 reads mean?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_sambam1.md)
 
-Let's take the 3nd one and find it's pair.
-
-try
-
-```
-samtools view alignment/NA12878/NA12878.sorted.bam | grep "1313:19317:61840"
-
-```
-
-**Why did searching one name find both reads?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_sambam4.md)
-
 
 You can use samtools to filter reads as well.
 
@@ -386,9 +374,7 @@ As the step says, this is to mark duplicate reads.
 **What are they caused by ?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_markdup2.md)
 
 
-**What are the ways to detect them ?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_markdup3.md)
-
-Here we will use picards approach:
+Here we will use picards for duplicates marking:
 
 ```
 java -Xmx8G -jar ${PICARD_JAR} MarkDuplicates \
@@ -407,14 +393,10 @@ less alignment/NA12878/NA12878.sorted.dup.metrics
 
 This is very low, we expect in general <2%.
 
-We can see that it computed seperate measures for each library.
-
-**Why is this important to do and not combine everything ?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_markdup5.md)
-
 
 ### Recalibration
 
-This is the last BAM cleaning up step.
+This is the last BAM cleaning-up step.
 
 The goal for this step is to try to recalibrate base quality scores. The vendors tend to inflate the values of the bases in the reads.
 Also, this step tries to lower the scores of some biased motifs for some technologies.
@@ -441,7 +423,7 @@ java -Xmx8G -jar ${GATK_JAR} \
 ```
 
 
-## Extract Metrics
+## Extract Metrics (optional in the workshop)
 
 Once your whole bam is generated, it's always a good thing to check the data again to see if everything makes sens.
 
@@ -527,9 +509,7 @@ less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv
 ## Calling variants with GATK
 <a name="variants"></a>
 
-If you recall from the previous module, we first mapped the reads to hg19 and then we removed duplicate reads and realigned the reads around the indels.
-
-Let's call SNPs in NA12878 using both the original and the improved bam files:
+We mapped the reads to hg19 and then we removed duplicate reads and realigned the reads around the indels. Let's now call SNPs in NA12878 :
 
 ```
 mkdir -p variants/
@@ -556,7 +536,8 @@ java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/hg19.fa\
 `-L` indicates the reference region where SNP calling should take place 
 
 
-
+HERE WE ARE !! variant have been called
+**Do you think this is enough ?** [solution](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/solutions/_variants.md)
 
 ## Filter the variants
 <a name="filter"></a>
