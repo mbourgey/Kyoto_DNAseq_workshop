@@ -1,1 +1,1 @@
-No the set of call need to be cleaned, annotated and post-prcessed to add the functional impact of variants 
+No the set of call needs to be cleaned, annotated and post-prcessed to add the functional impact of variants 
