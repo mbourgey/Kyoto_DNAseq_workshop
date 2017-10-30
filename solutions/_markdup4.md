@@ -1,3 +1,4 @@
  
-   - SRR 3% 
-   - ERR 7%
+   - 0.6% 
+
+Note that most of theses duplicates come form PCR reactions
