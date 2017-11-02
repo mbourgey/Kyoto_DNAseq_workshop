@@ -81,7 +81,7 @@ ln -s /home/mathieu/cleanCopy/* .
 The initial structure of your folders should look like this:   
 
 
-``
+```
 ROOT  
     |-- raw_reads/               # fastqs from the center (down sampled)  
         `-- NA12878/             # Child sample directory  
@@ -89,7 +89,7 @@ ROOT
         `-- NA12892/             # Mother sample directory  
     |-- scripts/                 # command lines scripts         
     |-- saved_results/           # precomputed final files  
-``
+```
 
 ### Cheat sheets
 
