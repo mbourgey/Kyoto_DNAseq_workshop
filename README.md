@@ -38,7 +38,7 @@ This analysis for exome sequencing or Whole genome sequencing. In both the cases
 
 ### Acces to the server
 
-Read these [directions] () for information on how to log into the server. 
+Read these [directions](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/directions/_connect.md) for information on how to log into the server. 
 
 ### Software requirements
 
@@ -143,11 +143,8 @@ java -Xmx8G -jar ${BVATOOLS_JAR} readsqc \
   --threads 1 --regionName ACTL8 --output originalQC/
 ```
 
-Copy the images from the originalQC folder to your desktop and open the images.
+Copy the images from the originalQC folder to your desktop and open the images following these [directions](https://github.com/mbourgey/Kyoto_DNAseq_workshop/blob/master/directions/_transfer.md)
 
-```
-scp -r <USER>@www.genome.med.kyoto-u.ac.jp:$WORK_DIR/originalQC/ ./
-```
 
 
 
