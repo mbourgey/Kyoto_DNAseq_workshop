@@ -9,7 +9,7 @@ depending on the network you are connected you may use one of this to port to co
 ### linux / Mac user
  
     * Open a terminal
-    * scp -p <PORT> <USERNAME>@gw.genome.med.kyoto-u.ac.jp:<DISTANT_PATH> <LOCAL_PATH>
+    * scp -r -P <PORT> <USERNAME>@gw.genome.med.kyoto-u.ac.jp:<DISTANT_PATH> <LOCAL_PATH>
 
 ### Windows
 
