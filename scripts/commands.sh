@@ -1,12 +1,13 @@
 #set up
-export SOFT_DIR=/usr/local/bin
+export SOFT_DIR=/usr/local/
 export WORK_DIR=$HOME/workshop/VariantCalling
 
-export TRIMMOMATIC_JAR=$SOFT_DIR/trimmomatic.jar
-export PICARD_JAR=$SOFT_DIR/picard.jar
-export GATK_JAR=$SOFT_DIR/GenomeAnalysisTK.jar
-export BVATOOLS_JAR=$SOFT_DIR/bvatools-full.jar
-export SNPEFF_HOME=/usr/local/src/snpEff/
+export TRIMMOMATIC_JAR=$SOFT_DIR/Trimmomatic-0.38/trimmomatic-0.38.jar
+export PICARD_JAR=$SOFT_DIR/picard/picard.jar
+#export PICARD_JAR=/home/mathieu/workshop/VariantCalling/picard.jar
+export GATK_JAR=$SOFT_DIR/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar
+export BVATOOLS_JAR=$SOFT_DIR/bvatools-1.6/bvatools-1.6-full.jar
+export SNPEFF_HOME=$SOFT_DIR/snpEff/
 export SNPEFF_JAR=$SNPEFF_HOME/snpEff.jar
 export REF=$WORK_DIR/reference/
 
@@ -60,7 +61,7 @@ bwa mem -M -t 2 \
   | java -Xmx8G -jar ${PICARD_JAR} SortSam \
   INPUT=/dev/stdin \
   OUTPUT=alignment/NA12878/NA12878.sorted.bam \
-  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=1500000
+  CREATE_INDEX=true SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=1500000
 
 samtools view alignment/NA12878/NA12878.sorted.bam | head -n4
 samtools view alignment/NA12878/NA12878.sorted.bam | grep "1313:19317:61840"
@@ -86,7 +87,7 @@ java -Xmx8G -jar ${GATK_JAR} \
   -I alignment/NA12878/NA12878.sorted.bam
 
 java -Xmx8G -jar ${PICARD_JAR} MarkDuplicates \
-  REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true \
+  REMOVE_DUPLICATES=false CREATE_INDEX=true \
   INPUT=alignment/NA12878/NA12878.realigned.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.bam \
   METRICS_FILE=alignment/NA12878/NA12878.sorted.dup.metrics
@@ -123,7 +124,6 @@ java  -Xmx8G -jar ${GATK_JAR} \
 #### Look at the coverage
 #less -S alignment/NA12878/NA12878.sorted.dup.recal.coverage.sample_interval_summary
 java -Xmx8G -jar ${PICARD_JAR} CollectInsertSizeMetrics \
-  VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/hg19.fa \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv \
@@ -133,7 +133,6 @@ java -Xmx8G -jar ${PICARD_JAR} CollectInsertSizeMetrics \
 #look at the output
 #less -S alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv
 java -Xmx8G -jar ${PICARD_JAR} CollectAlignmentSummaryMetrics \
-  VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/hg19.fa \
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv \
@@ -156,7 +155,7 @@ java -Xmx8g -jar $GATK_JAR -T VariantFiltration \
 --filterName FSFilter \
 --filterName MQFilter
 
-java -Xmx8G -jar $SNPEFF_JAR eff  -v -no-intergenic \
+java -Xmx8G -jar $SNPEFF_JAR eff -c ${REF}/snpEff.config -v -no-intergenic \
 -i vcf -o vcf hg19 variants/NA12878.hc.filter.vcf >  variants/NA12878.hc.filter.snpeff.vcf
 #less -S variants/NA12878.hc.filter.snpeff.vcf
 #less -S variants/NA12878.hc.filter.snpeff.vcf
