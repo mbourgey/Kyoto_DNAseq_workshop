@@ -510,7 +510,7 @@ We mapped the reads to hg19 and then we removed duplicate reads and realigned th
 
 ```
 mkdir -p variants/
-java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/hg19.fa\
+java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/hg19.fa \
 -I alignment/NA12878/NA12878.sorted.dup.recal.bam  --variant_index_type LINEAR --variant_index_parameter 128000 -dt none \
 -o variants/NA12878.hc.vcf -L chr1:17704860-18004860
 
