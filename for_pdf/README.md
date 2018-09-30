@@ -45,8 +45,8 @@ Read these directions for information on how to log into the server.
 ##### Port connection
 depending on the network you are connected you may use one of this to port to connect to the workshop server:
 
-    -- TCP connections to the port 22 from eduroam
-    -- TCP connections to the port 20022 from networks other than eduroam
+    -- TCP connections to the port 22 from workshop network
+    -- TCP connections to the port 30022 from other networks
 
 ##### linux / Mac user
  
@@ -58,7 +58,7 @@ depending on the network you are connected you may use one of this to port to co
     * Open your terminal software (TeraTerm or PuTTy)
     * create a new connection using the following information
         .  Server : gw.genome.med.kyoto-u.ac.jp
-        .  Port :   22 (from eduroam)  20022 (from the network other than eduroam)
+        .  Port :   22 (from eduroam)  30022 (from the other networks)
         .  USERNAME, passwd :  provided on the first day of the course
 
 
@@ -82,14 +82,14 @@ These are all already installed, but here are the original links.
 
 ```
 #set up
-export SOFT_DIR=/usr/local/bin
+export SOFT_DIR=/usr/local/
 export WORK_DIR=$HOME/workshop/VariantCalling
 
-export TRIMMOMATIC_JAR=$SOFT_DIR/trimmomatic.jar
-export PICARD_JAR=$SOFT_DIR/picard.jar
-export GATK_JAR=$SOFT_DIR/GenomeAnalysisTK.jar
-export BVATOOLS_JAR=$SOFT_DIR/bvatools-full.jar
-export SNPEFF_HOME=/usr/local/src/snpEff/
+export TRIMMOMATIC_JAR=$SOFT_DIR/Trimmomatic-0.38/trimmomatic-0.38.jar
+export PICARD_JAR=$SOFT_DIR/picard/picard.jar
+export GATK_JAR=$SOFT_DIR/GenomeAnalysisTK-3.8-1-0-gf15c1c3ef/GenomeAnalysisTK.jar
+export BVATOOLS_JAR=$SOFT_DIR/bvatools-1.6/bvatools-1.6-full.jar
+export SNPEFF_HOME=$SOFT_DIR/snpEff/
 export SNPEFF_JAR=$SNPEFF_HOME/snpEff.jar
 export REF=$WORK_DIR/reference/
 
@@ -97,7 +97,7 @@ export REF=$WORK_DIR/reference/
 rm -rf $WORK_DIR
 mkdir -p $WORK_DIR
 cd $WORK_DIR
-ln -s /home/mathieu/cleanCopy/* .
+ln -s /home/mathieu/cleanCopy/* . 
 ```
 
 ### Data files
@@ -186,8 +186,8 @@ Copy the images from the originalQC folder to your desktop and open the images f
 ##### Port connection
 depending on the network you are connected you may use one of this to port to connect to the workshop server:
 
-    -- TCP connections to the port 22 from eduroam
-    -- TCP connections to the port 20022 from networks other than eduroam
+    -- TCP connections to the port 22 from workshop network
+    -- TCP connections to the port 30022 from other networks
 
 ##### linux / Mac user
  
@@ -199,7 +199,7 @@ depending on the network you are connected you may use one of this to port to co
     * Open your file  transfert software (WinSCP or FilleZilla)
     * create a new connection using the following information
         .  Server : gw.genome.med.kyoto-u.ac.jp
-        .  Port :   22 (from eduroam)  20022 (from the network other than eduroam)
+        .  Port :   22 (from workshop network)  30022 (from the other networks)
         .  USERNAME, passwd :  provided on the first day of the course
         .  Navigate to the <DISTANT_PATH>
         .  Copy the data into your <LOCAL_PATH>
@@ -344,7 +344,7 @@ bwa mem -M -t 2 \
   | java -Xmx8G -jar ${PICARD_JAR} SortSam \
   INPUT=/dev/stdin \
   OUTPUT=alignment/NA12878/NA12878.sorted.bam \
-  CREATE_INDEX=true VALIDATION_STRINGENCY=SILENT SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=1500000
+  CREATE_INDEX=true  SORT_ORDER=coordinate MAX_RECORDS_IN_RAM=1500000
 ```
 \pagebreak
 
@@ -495,7 +495,7 @@ Here we will use picards for duplicates marking:
 
 ```
 java -Xmx8G -jar ${PICARD_JAR} MarkDuplicates \
-  REMOVE_DUPLICATES=false VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true \
+  REMOVE_DUPLICATES=false  CREATE_INDEX=true \
   INPUT=alignment/NA12878/NA12878.realigned.sorted.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.bam \
   METRICS_FILE=alignment/NA12878/NA12878.sorted.dup.metrics
@@ -588,7 +588,6 @@ Another way is to compare the mean to the median. If both are almost equal, your
 
 ```
 java -Xmx8G -jar ${PICARD_JAR} CollectInsertSizeMetrics \
-  VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/hg19.fa\
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.insertSize.tsv \
@@ -624,7 +623,6 @@ We prefer the Picard way of computing metrics
 
 ```
 java -Xmx8G -jar ${PICARD_JAR} CollectAlignmentSummaryMetrics  \
-  VALIDATION_STRINGENCY=SILENT \
   REFERENCE_SEQUENCE=${REF}/hg19.fa\
   INPUT=alignment/NA12878/NA12878.sorted.dup.recal.bam \
   OUTPUT=alignment/NA12878/NA12878.sorted.dup.recal.metric.alignment.tsv \
@@ -652,7 +650,7 @@ We mapped the reads to hg19 and then we removed duplicate reads and realigned th
 
 ```
 mkdir -p variants/
-java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/hg19.fa\
+java -Xmx8g -jar $GATK_JAR -T HaplotypeCaller -l INFO -R ${REF}/hg19.fa \
 -I alignment/NA12878/NA12878.sorted.dup.recal.bam  --variant_index_type LINEAR --variant_index_parameter 128000 -dt none \
 -o variants/NA12878.hc.vcf -L chr1:17704860-18004860
 
@@ -699,7 +697,7 @@ To perform more rigorous filtering, another program must be used. In our case, w
 
 ```
 java -Xmx8g -jar $GATK_JAR -T VariantFiltration \
--R ${REF}/hg19.fa--variant variants/NA12878.hc.vcf -o variants/NA12878.hc.filter.vcf --filterExpression "QD < 2.0" \
+-R ${REF}/hg19.fa --variant variants/NA12878.hc.vcf -o variants/NA12878.hc.filter.vcf --filterExpression "QD < 2.0" \
 --filterExpression "FS > 200.0" \
 --filterExpression "MQ < 40.0" \
 --filterName QDFilter \
@@ -740,7 +738,7 @@ We typically use SnpEff but many use Annovar and VEP as well.
 
 Let's run snpEff
 ```
-java -Xmx8G -jar $SNPEFF_JAR eff  -v -no-intergenic \
+java -Xmx8G -jar $SNPEFF_JAR eff -c ${REF}/snpEff.config -v -no-intergenic \
 -i vcf -o vcf hg19 variants/NA12878.hc.filter.vcf >  variants/NA12878.hc.filter.snpeff.vcf
 ```
 

@@ -1,7 +1,8 @@
-this can be done using this command:
+Let's extract  variants with a high impact:
 
-```{.bash}
-grep "HIGH\|MODERATE" pairedVariants/varscan.snpeff.vcf | grep "SOMATIC" | less
+```
+grep HIGH variants/NA12878.hc.filter.snpeff.vcf 
 ```
 
-A missens mutation in AK1 is predicted to have a moderate impact on the protein
+
+Only one variant is found 
