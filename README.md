@@ -547,7 +547,7 @@ To perform more rigorous filtering, another program must be used. In our case, w
 
 ```
 java -Xmx8g -jar $GATK_JAR -T VariantFiltration \
--R ${REF}/hg19.fa--variant variants/NA12878.hc.vcf -o variants/NA12878.hc.filter.vcf --filterExpression "QD < 2.0" \
+-R ${REF}/hg19.fa --variant variants/NA12878.hc.vcf -o variants/NA12878.hc.filter.vcf --filterExpression "QD < 2.0" \
 --filterExpression "FS > 200.0" \
 --filterExpression "MQ < 40.0" \
 --filterName QDFilter \
