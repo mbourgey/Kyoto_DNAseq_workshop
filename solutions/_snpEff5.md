@@ -1,7 +1,7 @@
 The MODERATE variant can be extracted using this command:
 
 ```
-grep MODERATE variants/NA12878.rmdup.realign.hc.filter.snpeff.vcf
+grep MODERATE variants/NA12878.hc.filter.snpeff.vcf 
 ```
 
 
